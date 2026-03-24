@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Portfolio Rebalancer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>Portfolio Rebalancer</h1>
+
+  <div class="card">
+    <label>Total Portfolio Value</label>
+    <input type="number" id="totalValue">
+
+    <label>Risk Profile</label>
+    <select id="riskProfile">
+      <option>Aggressive</option>
+      <option>Moderate</option>
+      <option>Conservative</option>
+    </select>
+
+    <label>Lumpsum</label>
+    <input type="number" id="lumpsum">
+  </div>
+
+  <div class="card">
+    <table id="portfolioTable">
+      <tr><th>Fund</th><th>Value</th></tr>
+    </table>
+    <button onclick="addRow()">Add Fund</button>
+  </div>
+
+  <button onclick="rebalance()">Rebalance</button>
+
+  <div class="card">
+    <table id="resultTable"></table>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
