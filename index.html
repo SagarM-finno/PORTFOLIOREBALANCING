@@ -2,41 +2,89 @@
 <html>
 <head>
   <title>Portfolio Rebalancer</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin:0; font-family:Inter,Arial; background:#0f172a; color:#e2e8f0; }
+    .container { max-width:1200px; margin:auto; padding:20px; }
+    h1 { font-weight:600; }
+    .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; }
+    .card { background:#1e293b; padding:16px; border-radius:12px; }
+    .card h3 { margin:0; font-size:14px; color:#94a3b8; }
+    .card h2 { margin-top:8px; font-size:22px; }
+    .inputs { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-top:20px; }
+    input,select { width:100%; padding:10px; background:#0f172a; border:1px solid #334155; color:white; border-radius:6px; }
+    button { background:#3b82f6; border:none; padding:12px; border-radius:8px; color:white; cursor:pointer; margin-top:15px; font-weight:600; }
+    table { width:100%; margin-top:20px; border-collapse:collapse; }
+    th { text-align:left; font-size:12px; color:#94a3b8; padding-bottom:10px; }
+    td { padding:10px 0; border-top:1px solid #1e293b; }
+    .BUY { color:#22c55e; } .SELL { color:#ef4444; } .HOLD { color:#94a3b8; }
+    .add-btn { background:#334155; margin-top:10px; }
+  </style>
 </head>
 <body>
 <div class="container">
-  <h1>Portfolio Rebalancer</h1>
+<h1>Portfolio Rebalancer</h1>
 
-  <div class="card">
-    <label>Total Portfolio Value</label>
-    <input type="number" id="totalValue">
-
-    <label>Risk Profile</label>
-    <select id="riskProfile">
-      <option>Aggressive</option>
-      <option>Moderate</option>
-      <option>Conservative</option>
-    </select>
-
-    <label>Lumpsum</label>
-    <input type="number" id="lumpsum">
-  </div>
-
-  <div class="card">
-    <table id="portfolioTable">
-      <tr><th>Fund</th><th>Value</th></tr>
-    </table>
-    <button onclick="addRow()">Add Fund</button>
-  </div>
-
-  <button onclick="rebalance()">Rebalance</button>
-
-  <div class="card">
-    <table id="resultTable"></table>
-  </div>
+<div class="grid">
+<div class="card"><h3>Total AUM</h3><h2 id="aum">₹10,00,000</h2></div>
+<div class="card"><h3>Total Buy</h3><h2 id="buy">₹0</h2></div>
+<div class="card"><h3>Total Sell</h3><h2 id="sell">₹0</h2></div>
+<div class="card"><h3>Lumpsum Used</h3><h2 id="lump">₹0</h2></div>
 </div>
 
-<script src="app.js"></script>
+<div class="inputs">
+<div><label>Total Portfolio</label><input id="total" value="1000000"></div>
+<div><label>Risk Profile</label><select id="risk"><option>Aggressive</option><option>Moderate</option><option>Conservative</option></select></div>
+<div><label>Lumpsum</label><input id="lumpsum" value="100000"></div>
+</div>
+
+<button onclick="rebalance()">Rebalance Portfolio</button>
+
+<div class="card">
+<table id="table">
+<tr><th>Fund</th><th>Category</th><th>Current</th><th>Target</th><th>Action</th><th>Amount</th></tr>
+</table>
+<button class="add-btn" onclick="addRow()">+ Add Fund</button>
+</div>
+
+</div>
+
+<script>
+const RISK_MAP = {Aggressive:{equity:70,debt:20,gold:10},Moderate:{equity:50,debt:40,gold:10},Conservative:{equity:30,debt:60,gold:10}};
+function category(name){name=name.toLowerCase();if(name.includes("equity"))return"equity";if(name.includes("debt"))return"debt";return"gold";}
+window.onload=()=>{addRow("HDFC Equity Fund",300000);addRow("ICICI Equity Fund",200000);addRow("SBI Debt Fund",300000);addRow("Axis Gold Fund",200000);}
+function addRow(name="",value=""){const row=table.insertRow();row.innerHTML=`<td><input value="${name}"></td><td>-</td><td><input type="number" value="${value}"></td><td>-</td><td>-</td><td>-</td>`;}
+function rebalance(){
+const rows=table.rows;
+const total=Number(document.getElementById("total").value);
+const risk=document.getElementById("risk").value;
+const lumpsum=Number(document.getElementById("lumpsum").value);
+document.getElementById("aum").innerText="₹"+total.toLocaleString();
+let data=[];
+for(let i=1;i<rows.length;i++){data.push({name:rows[i].cells[0].children[0].value,value:Number(rows[i].cells[2].children[0].value)});}
+const target=RISK_MAP[risk];
+let catTotals={equity:0,debt:0,gold:0};
+data.forEach(f=>{catTotals[category(f.name)]+=f.value;});
+let buy=0,sell=0,remaining=lumpsum;
+for(let i=1;i<rows.length;i++){
+const fund=data[i-1];
+const cat=category(fund.name);
+const targetVal=(target[cat]/100)*total*(fund.value/catTotals[cat]);
+let gap=targetVal-fund.value;
+let action="HOLD",amt=0;
+if(gap>0){let alloc=Math.min(gap,remaining);remaining-=alloc;gap-=alloc;}
+if(gap>100){action="BUY";amt=gap;buy+=amt;}
+else if(gap<-100){action="SELL";amt=Math.abs(gap);sell+=amt;}
+rows[i].cells[1].innerText=cat;
+rows[i].cells[3].innerText="₹"+Math.round(targetVal).toLocaleString();
+rows[i].cells[4].innerHTML=`<span class="${action}">${action}</span>`;
+rows[i].cells[5].innerText="₹"+Math.round(amt).toLocaleString();
+}
+document.getElementById("buy").innerText="₹"+Math.round(buy).toLocaleString();
+document.getElementById("sell").innerText="₹"+Math.round(sell).toLocaleString();
+document.getElementById("lump").innerText="₹"+(lumpsum-remaining).toLocaleString();
+}
+</script>
+
 </body>
 </html>
