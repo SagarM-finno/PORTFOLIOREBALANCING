@@ -1,90 +1,2306 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Portfolio Rebalancer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { margin:0; font-family:Inter,Arial; background:#0f172a; color:#e2e8f0; }
-    .container { max-width:1200px; margin:auto; padding:20px; }
-    h1 { font-weight:600; }
-    .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; }
-    .card { background:#1e293b; padding:16px; border-radius:12px; }
-    .card h3 { margin:0; font-size:14px; color:#94a3b8; }
-    .card h2 { margin-top:8px; font-size:22px; }
-    .inputs { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-top:20px; }
-    input,select { width:100%; padding:10px; background:#0f172a; border:1px solid #334155; color:white; border-radius:6px; }
-    button { background:#3b82f6; border:none; padding:12px; border-radius:8px; color:white; cursor:pointer; margin-top:15px; font-weight:600; }
-    table { width:100%; margin-top:20px; border-collapse:collapse; }
-    th { text-align:left; font-size:12px; color:#94a3b8; padding-bottom:10px; }
-    td { padding:10px 0; border-top:1px solid #1e293b; }
-    .BUY { color:#22c55e; } .SELL { color:#ef4444; } .HOLD { color:#94a3b8; }
-    .add-btn { background:#334155; margin-top:10px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Rebalancer — Finnovate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#009356; --green-light:#00b568; --green-dim:rgba(0,147,86,.10); --green-border:rgba(0,147,86,.25);
+  --red:#e53935; --red-dim:rgba(229,57,53,.10); --red-mid:rgba(229,57,53,.18);
+  --amber:#f59e0b; --amber-dim:rgba(245,158,11,.10);
+  --blue:#1565c0; --blue-dim:rgba(21,101,192,.10);
+  --bg:#f7f8f5; --surface:#fff; --surface2:#f0f2ed;
+  --ink:#111a14; --ink2:#4a5548; --ink3:#8a9488;
+  --border:rgba(0,0,0,.07); --shadow:0 2px 16px rgba(0,0,0,.06);
+  --radius:14px; --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.6}
+
+/* ── HEADER ── */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200}
+.logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--green);letter-spacing:-.3px}
+.logo span{color:var(--ink)}
+.header-badge{font-size:11px;font-weight:500;color:var(--ink3);background:var(--surface2);padding:4px 10px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase}
+
+/* ── LAYOUT ── */
+.app{max-width:1360px;margin:0 auto;padding:28px 24px 80px}
+
+/* ── STEPS ── */
+.steps{display:flex;gap:4px;background:var(--surface2);border-radius:12px;padding:4px;margin-bottom:24px;width:fit-content}
+.step-tab{padding:8px 20px;border-radius:9px;font-size:13px;font-weight:500;color:var(--ink3);cursor:pointer;transition:all .2s;border:none;background:none;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.step-tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 6px rgba(0,0,0,.08)}
+.step-dot{width:20px;height:20px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--ink3);flex-shrink:0}
+.step-tab.active .step-dot{background:var(--green);color:#fff}
+
+/* ── PAGES ── */
+.page{display:none;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin-bottom:18px;box-shadow:var(--shadow)}
+.card-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--ink);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.card-title-icon{width:30px;height:30px;background:var(--green-dim);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.card-subtitle{font-size:13px;color:var(--ink3);margin-top:-12px;margin-bottom:18px}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label{font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.6px}
+input,select{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--surface);transition:border-color .15s,box-shadow .15s;outline:none;width:100%}
+input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-dim)}
+input[type=number]{font-family:'DM Mono',monospace}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:var(--border);border-radius:2px;border:none;padding:0;box-shadow:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--green);border-radius:50%;cursor:pointer;box-shadow:0 1px 4px rgba(0,147,86,.35)}
+#lumpsumPct::-webkit-slider-thumb{background:var(--green)}
+
+/* ── ALLOC SLIDERS ── */
+.alloc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:4px}
+.alloc-item{background:var(--surface2);border-radius:var(--radius-sm);padding:14px 16px;border:1.5px solid transparent;transition:border-color .15s}
+.alloc-item:focus-within{border-color:var(--green)}
+.alloc-label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--ink3);margin-bottom:6px;display:flex;justify-content:space-between}
+.alloc-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--ink);margin-bottom:8px}
+.alloc-val span{font-size:13px;color:var(--ink3)}
+.alloc-total-bar{margin-top:18px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.alloc-total-fill{height:100%;border-radius:3px;transition:width .3s,background-color .3s}
+.alloc-total-label{margin-top:5px;font-size:12px;color:var(--ink3);display:flex;justify-content:space-between}
+.alloc-total-label strong{font-family:'DM Mono',monospace}
+
+/* ── LIVE ALLOCATION DASHBOARD (holdings page) ── */
+.live-alloc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:18px;box-shadow:var(--shadow)}
+.live-alloc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.live-alloc-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.live-alloc-total{font-family:'DM Mono',monospace;font-size:13px;color:var(--ink3)}
+.live-alloc-total strong{color:var(--ink);font-size:15px}
+
+/* 4-column alloc table */
+.alloc-table-wrap{overflow-x:auto}
+.alloc-summary-table{width:100%;border-collapse:collapse;font-size:13px}
+.alloc-summary-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3);padding:8px 14px;border-bottom:2px solid var(--border);white-space:nowrap;background:var(--surface2)}
+.alloc-summary-table th:first-child{border-radius:7px 0 0 0}
+.alloc-summary-table th:last-child{border-radius:0 7px 0 0}
+.alloc-summary-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.alloc-summary-table tr:last-child td{border-bottom:none}
+.cat-color-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;display:inline-block;margin-right:7px}
+.alloc-bar-wrap{width:140px;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;display:inline-block;vertical-align:middle}
+.alloc-bar-fill{height:100%;border-radius:4px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.dev-pill{font-family:'DM Mono',monospace;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.dev-over{background:var(--red-dim);color:var(--red)}
+.dev-under{background:var(--green-dim);color:var(--green)}
+.dev-ok{background:var(--surface2);color:var(--ink3)}
+.mono-val{font-family:'DM Mono',monospace;font-size:13px}
+
+/* ── FUND TABLE ── */
+.fund-table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ink3);padding:9px 10px;text-align:left;border-bottom:1.5px solid var(--border);white-space:nowrap;background:var(--surface2)}
+thead th.th-buy{background:#e8f5e9;color:#1b5e20}
+thead th.th-sell{background:#fdecea;color:#b71c1c}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+tbody tr:hover{background:#fafbf9}
+tbody tr:last-child{border-bottom:none}
+td{padding:8px 10px;vertical-align:middle}
+td input{padding:6px 8px;font-size:12.5px}
+.mono{font-family:'DM Mono',monospace;font-size:12px}
+
+/* buy / sell inputs */
+.input-buy{border-color:rgba(27,94,32,.25)!important;background:#f1faf2!important}
+.input-buy:focus{border-color:var(--green)!important;box-shadow:0 0 0 3px var(--green-dim)!important}
+.input-sell{border-color:rgba(183,28,28,.20)!important;background:#fdf3f3!important}
+.input-sell:focus{border-color:var(--red)!important;box-shadow:0 0 0 3px var(--red-dim)!important}
+
+/* mini bar */
+.breakdown-bar{display:flex;height:5px;border-radius:3px;overflow:hidden;min-width:70px;gap:1px}
+.bb-lc{background:#1565c0}.bb-mc{background:#2e7d32}.bb-sc{background:#e65100}.bb-ot{background:#9e9e9e}
+
+/* net action chip */
+.net-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.net-chip.BUY{background:var(--green-dim);color:var(--green)}
+.net-chip.SELL{background:var(--red-dim);color:var(--red)}
+.net-chip.HOLD{background:var(--surface2);color:var(--ink3)}
+
+/* AUTOCOMPLETE */
+.ac-wrap{position:relative}
+.ac-dropdown{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--surface);border:1.5px solid var(--green-border);border-radius:var(--radius-sm);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:500;max-height:220px;overflow-y:auto;display:none}
+.ac-dropdown.open{display:block}
+.ac-item{padding:9px 13px;cursor:pointer;transition:background .1s;font-size:13px;border-bottom:1px solid var(--border)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover{background:var(--green-dim);color:var(--green)}
+.ac-item small{display:block;font-size:10.5px;color:var(--ink3);font-family:'DM Mono',monospace;margin-top:1px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .18s;border:none;outline:none}
+.btn-primary{background:var(--green);color:#fff;box-shadow:0 2px 12px rgba(0,147,86,.28)}
+.btn-primary:hover{background:var(--green-light);box-shadow:0 4px 20px rgba(0,147,86,.38);transform:translateY(-1px)}
+.btn-ghost{background:var(--surface2);color:var(--ink2)}
+.btn-ghost:hover{background:#e4e7e0}
+.btn-danger{background:var(--red-dim);color:var(--red);padding:5px 9px;font-size:12px;border-radius:6px}
+.btn-danger:hover{background:var(--red-mid)}
+.add-row-btn{display:flex;align-items:center;gap:8px;margin-top:12px;padding:9px 16px;border-radius:var(--radius-sm);border:1.5px dashed var(--green-border);background:var(--green-dim);color:var(--green);font-weight:600;font-size:13px;cursor:pointer;transition:all .15s;width:100%;justify-content:center}
+.add-row-btn:hover{background:rgba(0,147,86,.16)}
+.action-row{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:8px}
+
+/* NOTICE */
+.notice{padding:11px 15px;border-radius:var(--radius-sm);font-size:12.5px;display:flex;align-items:flex-start;gap:9px;margin-top:12px}
+.notice-info{background:var(--green-dim);color:#064e3b;border-left:3px solid var(--green)}
+.notice-warn{background:var(--amber-dim);color:#92400e;border-left:3px solid var(--amber)}
+
+/* RESULTS */
+.results-hero{background:linear-gradient(135deg,#013d26 0%,#015c37 50%,#009356 100%);border-radius:var(--radius);padding:32px 32px 28px;color:#fff;margin-bottom:18px;position:relative;overflow:hidden}
+.results-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(255,255,255,.06) 0%,transparent 70%);border-radius:50%}
+.client-name-display{font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:4px;letter-spacing:-.3px}
+.client-meta{font-size:13px;opacity:.7;display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+.hero-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.hero-stat{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px}
+.hero-stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.7px;opacity:.65;margin-bottom:5px;font-weight:600}
+.hero-stat-val{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;letter-spacing:-.5px}
+.hero-stat-val.sell{color:#ffab91}.hero-stat-val.buy{color:#a5d6a7}
+
+.alloc-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.compare-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.compare-card h4{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;font-weight:700;color:var(--ink3);margin-bottom:14px}
+.alloc-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.alloc-row-label{width:80px;font-weight:500;color:var(--ink2);flex-shrink:0;font-size:12px}
+.alloc-row-bar-wrap{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.alloc-row-bar{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.alloc-row-pct{font-family:'DM Mono',monospace;font-size:12px;min-width:36px;text-align:right;flex-shrink:0;color:var(--ink2)}
+.drift-badge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:3px}
+.drift-over{background:var(--red-dim);color:var(--red)}.drift-under{background:var(--green-dim);color:var(--green)}
+
+.orders-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.order-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.order-card-header{padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.order-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.order-badge.sell{background:var(--red-dim);color:var(--red)}.order-badge.buy{background:var(--green-dim);color:var(--green)}
+.order-card-title{font-weight:600;font-size:14px}
+.order-total{margin-left:auto;font-family:'DM Mono',monospace;font-size:15px;font-weight:600}
+.order-total.sell{color:var(--red)}.order-total.buy{color:var(--green)}
+.order-list{padding:4px 0}
+.order-item{display:flex;align-items:center;padding:10px 18px;gap:12px;border-bottom:1px solid var(--border);transition:background .12s}
+.order-item:last-child{border-bottom:none}
+.order-item:hover{background:var(--surface2)}
+.order-item-info{flex:1;min-width:0}
+.order-item-name{font-weight:500;font-size:13px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order-item-folio{font-size:11px;color:var(--ink3);font-family:'DM Mono',monospace;margin-top:1px}
+.order-item-amt{font-family:'DM Mono',monospace;font-weight:600;font-size:14px;white-space:nowrap}
+.order-item-amt.sell{color:var(--red)}.order-item-amt.buy{color:var(--green)}
+.no-orders{padding:28px 18px;text-align:center;color:var(--ink3);font-size:13px}
+
+.action-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.action-chip.SELL{background:var(--red-dim);color:var(--red)}.action-chip.BUY{background:var(--green-dim);color:var(--green)}.action-chip.HOLD{background:var(--surface2);color:var(--ink3)}
+
+/* ── ADMIN MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--surface);border-radius:var(--radius);padding:32px 36px;width:360px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:translateY(16px);transition:transform .25s}
+.modal-overlay.open .modal-box{transform:none}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--ink3);margin-bottom:22px}
+.modal-error{font-size:12px;color:var(--red);margin-top:8px;min-height:18px}
+.modal-actions{display:flex;gap:10px;margin-top:20px}
+
+/* admin badge in header */
+.admin-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .15s;border:1.5px solid}
+.admin-badge.locked{background:var(--surface2);color:var(--ink3);border-color:var(--border)}
+.admin-badge.unlocked{background:#fff8e1;color:#92400e;border-color:#f59e0b}
+
+/* locked allocation inputs */
+input[readonly]{background:var(--surface2)!important;color:var(--ink2)!important;cursor:default!important;border-color:var(--border)!important}
+input[readonly]:focus{box-shadow:none!important;border-color:var(--border)!important}
+input.alloc-locked{background:var(--surface2)!important;color:var(--ink3)!important;cursor:not-allowed!important;border-color:var(--border)!important}
+input.alloc-locked:focus{box-shadow:none!important;border-color:var(--border)!important}
+.lock-icon{font-size:11px;color:var(--ink3);cursor:default;margin-left:4px;vertical-align:middle}
+.exclude-toggle{display:inline-flex;align-items:center;cursor:pointer;position:relative}
+.exclude-toggle input[type=checkbox]{position:absolute;opacity:0;width:0;height:0}
+.exclude-knob{
+  display:inline-block;width:36px;height:20px;border-radius:10px;
+  background:var(--surface2);border:1.5px solid var(--border);
+  transition:background .2s,border-color .2s;position:relative;flex-shrink:0;
+}
+.exclude-knob::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:14px;height:14px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s;
+}
+.exclude-toggle input:checked ~ .exclude-knob{
+  background:var(--red);border-color:var(--red);
+}
+.exclude-toggle input:checked ~ .exclude-knob::after{transform:translateX(16px)}
+
+.export-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.export-bar-label{font-weight:600;font-size:14px}.export-bar-sub{font-size:12px;color:var(--ink3)}
+
+/* ── LEVEL TOGGLE ── */
+.level-toggle{display:flex;gap:8px;margin-bottom:4px}
+.level-btn{padding:14px 28px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--ink2);transition:all .18s;display:flex;align-items:center;gap:8px}
+.level-btn:hover{border-color:var(--green-border);background:var(--green-dim)}
+.level-btn.active{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.level-btn .level-icon{font-size:18px}
+
+/* ── FAMILY PANEL ── */
+.family-panel{margin-top:18px}
+.family-select{width:100%;max-width:360px}
+.member-list{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.member-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface2);border-radius:var(--radius-sm);border:1.5px solid transparent;transition:border-color .15s}
+.member-row:hover{border-color:var(--green-border)}
+.member-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+.member-row .member-info{flex:1;min-width:0}
+.member-row .member-name{font-weight:600;font-size:14px;color:var(--ink)}
+.member-row .member-detail{font-size:11.5px;color:var(--ink3);font-family:'DM Mono',monospace;margin-top:1px}
+.member-row.deselected{opacity:.45;background:#fafafa}
+.member-row.deselected .member-name{text-decoration:line-through}
+.member-count{font-size:12px;color:var(--ink3);margin-top:8px}
+
+/* ── INVESTOR COLUMN ── */
+.investor-col{min-width:140px}
+.investor-group-header{background:var(--surface2);padding:10px 18px;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.investor-group-header .ig-count{font-weight:400;text-transform:none;letter-spacing:0}
+
+/* ── MEMBER FOLD (collapsible per-member sections) ── */
+.member-fold{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:14px;overflow:hidden;transition:border-color .15s}
+.member-fold:hover{border-color:var(--green-border)}
+.member-fold-header{width:100%;background:var(--surface2);border:none;padding:13px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;transition:background .15s}
+.member-fold-header:hover{background:#e4e7e0}
+.member-fold-caret{font-size:11px;color:var(--ink3);transition:transform .2s;display:inline-block;width:14px}
+.member-fold.collapsed .member-fold-caret{transform:rotate(-90deg)}
+.member-fold-name{font-weight:600;font-size:14px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.member-fold-name .member-pan{font-size:10.5px;color:var(--ink3);font-family:'DM Mono',monospace;font-weight:400;text-transform:none;letter-spacing:0}
+.member-fold-meta{margin-left:auto;font-size:11.5px;color:var(--ink3);font-family:'DM Mono',monospace;display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.member-fold-meta .mfm-label{text-transform:uppercase;letter-spacing:.5px;font-size:9.5px;color:var(--ink3);margin-right:5px}
+.member-fold-meta .mfm-val{color:var(--ink);font-weight:600}
+.member-fold-body{padding:14px 16px}
+.member-fold.collapsed .member-fold-body{display:none}
+.member-fold-empty{padding:14px;text-align:center;font-size:12.5px;color:var(--ink3);font-style:italic;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:10px}
+.member-fold .add-row-btn{margin-top:12px}
+.member-fold-unassigned .member-fold-header{background:#fff8e1;color:#92400e}
+.member-fold-unassigned:hover{border-color:#f59e0b}
+
+/* ── TAX CALCULATIONS ── */
+.tax-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin-bottom:18px;box-shadow:var(--shadow)}
+.tax-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.tax-section{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:18px 20px;background:var(--surface)}
+.tax-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.tax-section-title .tax-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tax-section.debt{border-color:rgba(21,101,192,.20)}.tax-section.debt .tax-section-title{color:var(--blue)}
+.tax-section.equity{border-color:rgba(0,147,86,.20)}.tax-section.equity .tax-section-title{color:var(--green)}
+.tax-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.tax-row:last-child{margin-bottom:0}
+.tax-row label{font-size:12px;font-weight:600;color:var(--ink2);min-width:100px;flex-shrink:0;text-transform:none;letter-spacing:0}
+.tax-row input{max-width:160px;font-family:'DM Mono',monospace;font-size:13px}
+.tax-row .tax-result{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;min-width:100px;text-align:right;color:var(--ink)}
+.tax-rate-hint{font-size:10.5px;color:var(--ink3);white-space:nowrap}
+.tax-summary{display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding:14px 20px;background:var(--surface2);border-radius:var(--radius-sm);flex-wrap:wrap;gap:12px}
+.tax-summary-item{display:flex;flex-direction:column;gap:3px}
+.tax-summary-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ink3)}
+.tax-summary-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:600;color:var(--ink)}
+.tax-summary-val.total{color:var(--red)}
+@media(max-width:768px){.tax-grid{grid-template-columns:1fr}.orders-grid,.alloc-compare{grid-template-columns:1fr}.hero-stats{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.app{padding:18px 12px 60px}header{padding:0 14px}.steps{overflow-x:auto}.form-grid{grid-template-columns:1fr}.alloc-grid{grid-template-columns:1fr 1fr}}
+@media print{header,.steps,.action-row,.export-bar .btn{display:none!important}.page{display:block!important}.page:not(#page-results):not(#page-sip-results){display:none!important}body{background:#fff}.results-hero{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style>
 </head>
 <body>
-<div class="container">
-<h1>Portfolio Rebalancer</h1>
 
-<div class="grid">
-<div class="card"><h3>Total AUM</h3><h2 id="aum">₹10,00,000</h2></div>
-<div class="card"><h3>Total Buy</h3><h2 id="buy">₹0</h2></div>
-<div class="card"><h3>Total Sell</h3><h2 id="sell">₹0</h2></div>
-<div class="card"><h3>Lumpsum Used</h3><h2 id="lump">₹0</h2></div>
+<header>
+  <div class="logo">Fin<span>novate</span></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="admin-badge locked" id="adminBadge" onclick="openAdminModal()">🔒 Admin</button>
+    <div class="header-badge">Portfolio Rebalancer</div>
+  </div>
+</header>
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-box">
+    <div class="modal-title">Admin Login</div>
+    <div class="modal-sub">Enter the admin password to edit strategy settings and fund allocations.</div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="adminPwInput" placeholder="Enter admin password"
+        onkeydown="if(event.key==='Enter')submitAdminLogin()" />
+    </div>
+    <div class="modal-error" id="adminLoginError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" style="flex:1" onclick="submitAdminLogin()">Login</button>
+      <button class="btn btn-ghost" onclick="closeAdminModal()">Cancel</button>
+    </div>
+  </div>
 </div>
 
-<div class="inputs">
-<div><label>Total Portfolio</label><input id="total" value="1000000"></div>
-<div><label>Risk Profile</label><select id="risk"><option>Aggressive</option><option>Moderate</option><option>Conservative</option></select></div>
-<div><label>Lumpsum</label><input id="lumpsum" value="100000"></div>
-</div>
+<div class="app">
 
-<button onclick="rebalance()">Rebalance Portfolio</button>
+  <div class="steps">
+    <button class="step-tab active" data-page="page-client"     onclick="goTo('page-client')">    <span class="step-dot">1</span> Client Profile    </button>
+    <button class="step-tab"        data-page="page-allocation" onclick="goTo('page-allocation')"><span class="step-dot">2</span> Target Allocation </button>
+    <button class="step-tab"        data-page="page-funds"      onclick="goTo('page-funds')">      <span class="step-dot">3</span> Lumpsum Rebalancing</button>
+    <button class="step-tab"        data-page="page-results"    onclick="calculate()">             <span class="step-dot">4</span> Lumpsum Orders    </button>
+    <button class="step-tab"        data-page="page-sip"        onclick="goToSip()">               <span class="step-dot">5</span> SIP Rebalancing   </button>
+    <button class="step-tab"        data-page="page-sip-results" onclick="calculateSip()">         <span class="step-dot">6</span> SIP Orders        </button>
+  </div>
 
-<div class="card">
-<table id="table">
-<tr><th>Fund</th><th>Category</th><th>Current</th><th>Target</th><th>Action</th><th>Amount</th></tr>
-</table>
-<button class="add-btn" onclick="addRow()">+ Add Fund</button>
-</div>
+  <!-- ══ PAGE 1: CLIENT ══ -->
+  <div class="page active" id="page-client">
 
-</div>
+    <!-- REVIEW LEVEL SELECTOR -->
+    <div class="card">
+      <div class="card-title"><span class="card-title-icon">📋</span> Review Level</div>
+      <p class="card-subtitle">Choose whether this review is for a single client or an entire family.</p>
+      <div class="level-toggle">
+        <button class="level-btn active" id="levelBtnClient" onclick="setReviewLevel('client')">
+          <span class="level-icon">👤</span> Client Level
+        </button>
+        <button class="level-btn" id="levelBtnFamily" onclick="setReviewLevel('family')">
+          <span class="level-icon">👨‍👩‍👧‍👦</span> Family Level
+        </button>
+      </div>
+
+      <!-- FAMILY PANEL (hidden by default) -->
+      <div class="family-panel" id="familyPanel" style="display:none">
+        <div class="form-group" style="margin-bottom:14px">
+          <label>Select Family (Account)</label>
+          <select id="familySelect" class="family-select" onchange="selectFamily(this.value)">
+            <option value="">-- Choose a family --</option>
+          </select>
+        </div>
+        <div id="memberListContainer"></div>
+      </div>
+    </div>
+
+    <!-- CLIENT INFO (visible in client mode, hidden in family mode) -->
+    <div class="card" id="clientInfoCard">
+      <div class="card-title"><span class="card-title-icon">👤</span> Client Information</div>
+      <div class="form-grid">
+        <div class="form-group full"><label>Investor / Client Name</label><input type="text" id="clientName" placeholder="e.g. Dr. Rajesh Mehta" /></div>
+        <div class="form-group"><label>Email Address</label><input type="email" id="clientEmail" placeholder="rajesh@example.com" /></div>
+        <div class="form-group"><label>PAN Number</label><input type="text" id="clientPAN" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase" /></div>
+        <div class="form-group">
+          <label>Account Type</label>
+          <select id="accountType">
+            <option value="SB">Savings (SB)</option><option value="NRE">NRE</option><option value="NRO">NRO</option><option value="CA">Current Account (CA)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEW SETTINGS (shared across both levels) -->
+    <div class="card">
+      <div class="card-title"><span class="card-title-icon">⚙️</span> Review Settings</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Review Type</label>
+          <select id="reviewType" onchange="setReviewType(this.value)">
+            <option value="both">Both (Lumpsum + SIP)</option>
+            <option value="lumpsum">Only Lumpsum</option>
+            <option value="sip">Only SIP</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Risk Profile</label>
+          <select id="riskProfile" onchange="applyRiskProfile()">
+            <option value="">-- Select --</option>
+            <option value="conservative">Conservative</option>
+            <option value="moderate">Moderate</option>
+            <option value="moderately_aggressive">Moderately Aggressive</option>
+            <option value="aggressive">Aggressive</option>
+            <option value="very_aggressive">Very Aggressive</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Service Model</label>
+          <select id="serviceModel">
+            <option value="">-- Select --</option>
+            <option value="Executionary">Executionary</option>
+            <option value="Advisory">Advisory</option>
+            <option value="Heldaway">Heldaway</option>
+          </select>
+        </div>
+      </div>
+      <div class="notice notice-info" style="margin-top:12px">ℹ️ Review is performed for one service model at a time. Select the account type being reviewed.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-title-icon">💰</span> Portfolio Value</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Total Portfolio Value (₹)</label><input type="number" id="totalPortfolio" placeholder="0" min="0" oninput="refreshLiveAlloc()" /></div>
+        <div class="form-group"><label>Additional Lumpsum to Deploy (₹)</label><input type="number" id="additionalLumpsum" placeholder="0" min="0" value="0" oninput="refreshLiveAlloc()" /></div>
+      </div>
+    </div>
+    <div class="action-row"><button class="btn btn-primary" onclick="goTo('page-allocation')">Continue to Allocation →</button></div>
+  </div>
+
+  <!-- ══ PAGE 2: ALLOCATION ══ -->
+  <div class="page" id="page-allocation">
+    <div class="card">
+      <div class="card-title"><span class="card-title-icon">🎯</span> Target Asset Allocation</div>
+      <p class="card-subtitle">Selecting a risk profile auto-fills these — you can override any value.</p>
+      <div class="alloc-grid">
+        <div class="alloc-item">
+          <div class="alloc-label">Large Cap <span id="lcPct">30%</span></div>
+          <div class="alloc-val" id="lcVal">30 <span>%</span></div>
+          <input type="range" min="0" max="100" value="30" id="lcRange" oninput="updateAlloc()">
+        </div>
+        <div class="alloc-item">
+          <div class="alloc-label">Mid Cap <span id="mcPct">25%</span></div>
+          <div class="alloc-val" id="mcVal">25 <span>%</span></div>
+          <input type="range" min="0" max="100" value="25" id="mcRange" oninput="updateAlloc()">
+        </div>
+        <div class="alloc-item">
+          <div class="alloc-label">Small Cap <span id="scPct">20%</span></div>
+          <div class="alloc-val" id="scVal">20 <span>%</span></div>
+          <input type="range" min="0" max="100" value="20" id="scRange" oninput="updateAlloc()">
+        </div>
+        <div class="alloc-item">
+          <div class="alloc-label">Others <span id="otPct">25%</span></div>
+          <div class="alloc-val" id="otVal">25 <span>%</span></div>
+          <input type="range" min="0" max="100" value="25" id="otRange" oninput="updateAlloc()">
+        </div>
+      </div>
+      <div class="alloc-total-bar"><div class="alloc-total-fill" id="allocTotalFill" style="width:100%;background:var(--green)"></div></div>
+      <div class="alloc-total-label"><span>Total Allocation</span><strong id="allocTotalPct">100%</strong></div>
+      <div id="allocNotice" class="notice notice-warn" style="display:none">⚠️ Allocation must total exactly 100% before proceeding.</div>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-ghost" onclick="goTo('page-client')">← Back</button>
+      <button class="btn btn-primary" onclick="continueFromAllocation()">Continue to Holdings →</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 3: HOLDINGS ══ -->
+  <div class="page" id="page-funds">
+
+    <!-- LIVE ALLOCATION DASHBOARD -->
+    <div class="live-alloc-card">
+      <div class="live-alloc-header">
+        <div class="live-alloc-title"><span style="font-size:16px">📊</span> Live Allocation</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="live-alloc-total">Portfolio: <strong id="liveTotal">₹0</strong></div>
+          <div style="width:1px;height:20px;background:var(--border)"></div>
+          <div class="live-alloc-total">After trades: <strong id="liveTotalAfter">₹0</strong></div>
+          <div style="width:1px;height:20px;background:var(--border)"></div>
+          <div style="display:flex;align-items:center;gap:8px;background:#fdecea;border:1px solid rgba(229,57,53,.18);border-radius:8px;padding:6px 14px">
+            <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--red)">Sell Proceeds</span>
+            <strong id="liveSellProceeds" style="font-family:'DM Mono',monospace;font-size:15px;color:var(--red)">₹0</strong>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;background:#e8f5e9;border:1px solid rgba(0,147,86,.20);border-radius:8px;padding:6px 14px">
+            <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--green)">Available for Allocation</span>
+            <strong id="liveAvailable" style="font-family:'DM Mono',monospace;font-size:15px;color:var(--green)">₹0</strong>
+          </div>
+        </div>
+      </div>
+      <div class="alloc-table-wrap">
+        <table class="alloc-summary-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Current Value</th>
+              <th style="min-width:180px">Current Allocation</th>
+              <th>Ideal %</th>
+              <th>Ideal Value</th>
+              <th>Deviation</th>
+              <th style="min-width:180px">After Trades</th>
+            </tr>
+          </thead>
+          <tbody id="liveAllocBody">
+            <!-- filled by JS -->
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <span style="font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#1565c0;display:inline-block"></span>Large Cap</span>
+        <span style="font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#2e7d32;display:inline-block"></span>Mid Cap</span>
+        <span style="font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#e65100;display:inline-block"></span>Small Cap</span>
+        <span style="font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#9e9e9e;display:inline-block"></span>Others</span>
+      </div>
+    </div>
+
+    <!-- FUND TABLE -->
+    <div class="card" style="padding:20px 20px">
+      <div class="card-title"><span class="card-title-icon">📋</span> Fund Holdings</div>
+      <p class="card-subtitle">Type to search funds — breakdown auto-fills. Enter Buy or Sell amounts to see live allocation update above.</p>
+      <div id="fundsContainer"></div>
+      <div class="notice notice-info" style="margin-top:12px">ℹ️ Enter a Buy or Sell amount per fund — the allocation dashboard above updates instantly to reflect the post-trade position.</div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-ghost" onclick="goTo('page-allocation')">← Back</button>
+      <button class="btn btn-primary" onclick="calculate()">View Rebalancing Report →</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 5: SIP REBALANCING ══ -->
+  <div class="page" id="page-sip">
+
+    <!-- SIP LIVE ALLOCATION DASHBOARD -->
+    <div class="live-alloc-card">
+      <div class="live-alloc-header">
+        <div class="live-alloc-title"><span style="font-size:16px">📊</span> SIP Allocation</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="live-alloc-total">Total Monthly SIP: <strong id="sipLiveTotal">₹0</strong></div>
+          <div style="width:1px;height:20px;background:var(--border)"></div>
+          <div class="live-alloc-total">After trades: <strong id="sipLiveTotalAfter">₹0</strong></div>
+          <div style="width:1px;height:20px;background:var(--border)"></div>
+          <div style="display:flex;align-items:center;gap:8px;background:#fdecea;border:1px solid rgba(229,57,53,.18);border-radius:8px;padding:6px 14px">
+            <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--red)">Stop SIP Total</span>
+            <strong id="sipLiveStopTotal" style="font-family:'DM Mono',monospace;font-size:15px;color:var(--red)">₹0</strong>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;background:#e8f5e9;border:1px solid rgba(0,147,86,.20);border-radius:8px;padding:6px 14px">
+            <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--green)">Start SIP Total</span>
+            <strong id="sipLiveStartTotal" style="font-family:'DM Mono',monospace;font-size:15px;color:var(--green)">₹0</strong>
+          </div>
+        </div>
+      </div>
+      <div class="alloc-table-wrap">
+        <table class="alloc-summary-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Current SIP Value</th>
+              <th style="min-width:180px">Current SIP Allocation</th>
+              <th>Ideal %</th>
+              <th>Ideal SIP Value</th>
+              <th>Deviation</th>
+              <th style="min-width:180px">After Trades</th>
+            </tr>
+          </thead>
+          <tbody id="sipLiveAllocBody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <span style="font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#1565c0;display:inline-block"></span>Large Cap</span>
+        <span style="font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#2e7d32;display:inline-block"></span>Mid Cap</span>
+        <span style="font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#e65100;display:inline-block"></span>Small Cap</span>
+        <span style="font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#9e9e9e;display:inline-block"></span>Others</span>
+      </div>
+    </div>
+
+    <!-- SIP FUND TABLE -->
+    <div class="card" style="padding:20px 20px">
+      <div class="card-title"><span class="card-title-icon">📋</span> SIP Holdings</div>
+      <p class="card-subtitle">Enter Start SIP or Stop SIP amounts to rebalance your monthly SIP allocation.</p>
+      <div id="sipFundsContainer"></div>
+      <div class="notice notice-info" style="margin-top:12px">ℹ️ Enter a Start SIP or Stop SIP amount per fund — the SIP allocation dashboard above updates instantly.</div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-ghost" onclick="goTo('page-results')">← Back to Lumpsum Orders</button>
+      <button class="btn btn-primary" onclick="calculateSip()">View SIP Rebalancing Report →</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 4: RESULTS ══ -->
+  <div class="page" id="page-results">
+    <div class="export-bar">
+      <div><div class="export-bar-label">Rebalancing Report</div><div class="export-bar-sub" id="reportDate"></div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="goTo('page-funds')">← Edit Holdings</button>
+        <button class="btn btn-primary" onclick="window.print()">🖨 Print / Export PDF</button>
+      </div>
+    </div>
+    <div class="results-hero">
+      <div class="client-name-display" id="heroName">—</div>
+      <div class="client-meta" id="heroMeta"></div>
+      <div class="hero-stats" id="heroStats"></div>
+    </div>
+    <div class="alloc-compare">
+      <div class="compare-card"><h4>📍 Current Allocation</h4><div id="currentAllocViz"></div></div>
+      <div class="compare-card"><h4>🎯 Target Allocation</h4><div id="targetAllocViz"></div></div>
+    </div>
+    <div class="orders-grid">
+      <div class="order-card">
+        <div class="order-card-header"><span class="order-badge sell">SELL</span><span class="order-card-title">Redemption Orders</span><span class="order-total sell" id="totalSellAmt">₹0</span></div>
+        <div class="order-list" id="sellOrders"></div>
+      </div>
+      <div class="order-card">
+        <div class="order-card-header"><span class="order-badge buy">BUY</span><span class="order-card-title">Purchase Orders</span><span class="order-total buy" id="totalBuyAmt">₹0</span></div>
+        <div class="order-list" id="buyOrders"></div>
+      </div>
+    </div>
+    <!-- TAX CALCULATIONS -->
+    <div class="tax-card" id="taxCalcCard">
+      <div class="card-title"><span class="card-title-icon">🧾</span> Tax Calculations</div>
+      <p class="card-subtitle">Enter estimated capital gains from sell orders to compute applicable taxes (FY 2025-26 rates).</p>
+      <div class="tax-grid">
+        <!-- DEBT -->
+        <div class="tax-section debt">
+          <div class="tax-section-title"><span class="tax-dot" style="background:var(--blue)"></span> Debt Funds</div>
+          <div class="tax-row">
+            <label>Long Term Gain</label>
+            <input type="number" id="taxDebtLTCG" placeholder="0" min="0" oninput="recalcTax()">
+            <span class="tax-rate-hint">@ slab rate</span>
+            <span class="tax-result" id="taxDebtLTCGResult">₹0</span>
+          </div>
+          <div class="tax-row">
+            <label>Short Term Gain</label>
+            <input type="number" id="taxDebtSTCG" placeholder="0" min="0" oninput="recalcTax()">
+            <span class="tax-rate-hint">@ slab rate</span>
+            <span class="tax-result" id="taxDebtSTCGResult">₹0</span>
+          </div>
+        </div>
+        <!-- EQUITY -->
+        <div class="tax-section equity">
+          <div class="tax-section-title"><span class="tax-dot" style="background:var(--green)"></span> Equity Funds</div>
+          <div class="tax-row">
+            <label>Long Term Gain</label>
+            <input type="number" id="taxEquityLTCG" placeholder="0" min="0" oninput="recalcTax()">
+            <span class="tax-rate-hint">@ 12.5% (above ₹1.25L)</span>
+            <span class="tax-result" id="taxEquityLTCGResult">₹0</span>
+          </div>
+          <div class="tax-row">
+            <label>Short Term Gain</label>
+            <input type="number" id="taxEquitySTCG" placeholder="0" min="0" oninput="recalcTax()">
+            <span class="tax-rate-hint">@ 20%</span>
+            <span class="tax-result" id="taxEquitySTCGResult">₹0</span>
+          </div>
+        </div>
+      </div>
+      <div class="tax-summary">
+        <div class="tax-summary-item">
+          <span class="tax-summary-label">Debt Tax</span>
+          <span class="tax-summary-val" id="taxDebtTotal">₹0</span>
+        </div>
+        <div class="tax-summary-item">
+          <span class="tax-summary-label">Equity Tax</span>
+          <span class="tax-summary-val" id="taxEquityTotal">₹0</span>
+        </div>
+        <div class="tax-summary-item">
+          <span class="tax-summary-label">Total Estimated Tax</span>
+          <span class="tax-summary-val total" id="taxGrandTotal">₹0</span>
+        </div>
+        <div class="tax-summary-item">
+          <span class="tax-summary-label">Net Proceeds (After Tax)</span>
+          <span class="tax-summary-val" id="taxNetProceeds" style="color:var(--green)">₹0</span>
+        </div>
+      </div>
+      <div class="notice notice-info" style="margin-top:12px">ℹ️ Equity LTCG: 12.5% on gains above ₹1.25 lakh exemption. Equity STCG: 20%. Debt gains (both LT & ST) are taxed at income tax slab rate — 30% used as default. Surcharge & cess not included.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="card-title-icon">✅</span> Final Portfolio (Post-Rebalancing)</div>
+      <div class="fund-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th class="investor-col" style="display:none">Investor</th><th>Fund Name</th><th>Folio</th><th>Before (₹)</th><th>After (₹)</th><th>% of Total</th></tr></thead>
+          <tbody id="finalPortfolioBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LUMPSUM STRATEGY -->
+    <div class="card" id="lumpsumStrategyCard">
+      <div class="card-title"><span class="card-title-icon">💡</span> Lumpsum + STP Strategy</div>
+      <p class="card-subtitle" style="margin-top:-10px;margin-bottom:20px">Split each buy order between a direct Lumpsum and an STP from the scheme's liquid fund.</p>
+
+      <!-- Strategy controls — admin gated -->
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding:16px 20px;background:var(--surface2);border-radius:var(--radius-sm)">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3)">Lumpsum %</label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="range" id="lumpsumPct" min="0" max="100" value="40" oninput="updateLumpsumStrategy()" style="width:140px" disabled>
+            <span id="lumpsumPctVal" style="font-family:'DM Mono',monospace;font-size:18px;font-weight:600;color:var(--green);min-width:44px">40%</span>
+          </div>
+        </div>
+        <div style="width:1px;height:40px;background:var(--border)"></div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3)">STP %</label>
+          <span id="stpPctVal" style="font-family:'DM Mono',monospace;font-size:18px;font-weight:600;color:var(--blue)">60%</span>
+        </div>
+        <div style="width:1px;height:40px;background:var(--border)"></div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3)">STP Duration (Weeks)</label>
+          <select id="stpWeeks" onchange="updateLumpsumStrategy()" style="width:150px;padding:7px 10px;font-size:13px" disabled>
+            <option value="4">4 weeks</option>
+            <option value="8">8 weeks</option>
+            <option value="12">12 weeks</option>
+            <option value="16">16 weeks</option>
+            <option value="24" selected>24 weeks (~6 mo)</option>
+            <option value="36">36 weeks (~9 mo)</option>
+            <option value="48">48 weeks (~12 mo)</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3)">STP Frequency</label>
+          <span style="font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--ink2)">Weekly</span>
+        </div>
+        <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div style="text-align:right">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:3px">Total Buy Amount</div>
+            <div id="stratTotalBuy" style="font-family:'DM Mono',monospace;font-size:20px;font-weight:600;color:var(--green)">₹0</div>
+          </div>
+          <div id="stratAdminNote" style="font-size:11px;color:var(--amber);display:flex;align-items:center;gap:5px">
+            🔒 Login as Admin to edit strategy
+          </div>
+        </div>
+      </div>
+
+      <!-- Split bar -->
+      <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:6px">
+        <div id="lumpsumBar" style="background:var(--green);transition:width .3s;width:40%"></div>
+        <div id="stpBar"     style="background:var(--blue);opacity:.7;transition:width .3s;width:60%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink3);margin-bottom:20px">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>Direct Lumpsum</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--blue);opacity:.7;display:inline-block"></span>STP via Liquid Fund</span>
+      </div>
+
+      <!-- Strategy table -->
+      <div class="fund-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Target Fund</th>
+              <th>Total Buy (₹)</th>
+              <th style="background:#e8f5e9;color:#1b5e20">Direct Lumpsum (₹)</th>
+              <th style="background:#e3f2fd;color:#0d47a1">Liquid Fund (STP Source)</th>
+              <th style="background:#e3f2fd;color:#0d47a1">STP Amount (₹)</th>
+              <th style="background:#e3f2fd;color:#0d47a1">Weekly STP (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="lumpsumStrategyBody"></tbody>
+        </table>
+      </div>
+      <div class="notice notice-info" style="margin-top:14px">ℹ️ STP amount is invested into the liquid fund of the same AMC and systematically transferred to the target fund over the selected duration.</div>
+    </div>
+
+    <div class="action-row" id="lumpsumResultsActions">
+      <button class="btn btn-ghost" onclick="goTo('page-funds')">← Edit Holdings</button>
+      <button class="btn btn-primary" id="continueToSipBtn" onclick="goToSip()">Continue to SIP Rebalancing →</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE 6: SIP RESULTS ══ -->
+  <div class="page" id="page-sip-results">
+    <div class="export-bar">
+      <div><div class="export-bar-label">SIP Rebalancing Report</div><div class="export-bar-sub" id="sipReportDate"></div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="goToSip()">← Edit SIP Holdings</button>
+        <button class="btn btn-primary" onclick="window.print()">🖨 Print / Export PDF</button>
+      </div>
+    </div>
+    <div class="results-hero">
+      <div class="client-name-display" id="sipHeroName">—</div>
+      <div class="client-meta" id="sipHeroMeta"></div>
+      <div class="hero-stats" id="sipHeroStats"></div>
+    </div>
+    <div class="alloc-compare">
+      <div class="compare-card"><h4>📍 Current SIP Allocation</h4><div id="sipCurrentAllocViz"></div></div>
+      <div class="compare-card"><h4>🎯 Target Allocation</h4><div id="sipTargetAllocViz"></div></div>
+    </div>
+    <div class="orders-grid">
+      <div class="order-card">
+        <div class="order-card-header"><span class="order-badge sell">STOP SIP</span><span class="order-card-title">Stop SIP Orders</span><span class="order-total sell" id="sipTotalStopAmt">₹0</span></div>
+        <div class="order-list" id="sipStopOrders"></div>
+      </div>
+      <div class="order-card">
+        <div class="order-card-header"><span class="order-badge buy">START SIP</span><span class="order-card-title">Start SIP Orders</span><span class="order-total buy" id="sipTotalStartAmt">₹0</span></div>
+        <div class="order-list" id="sipStartOrders"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-title-icon">✅</span> Final SIP Portfolio (Post-Rebalancing)</div>
+      <div class="fund-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th class="investor-col" style="display:none">Investor</th><th>Fund Name</th><th>Folio</th><th>Before SIP (₹/mo)</th><th>After SIP (₹/mo)</th><th>% of Total SIP</th></tr></thead>
+          <tbody id="sipFinalPortfolioBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.app -->
 
 <script>
-const RISK_MAP = {Aggressive:{equity:70,debt:20,gold:10},Moderate:{equity:50,debt:40,gold:10},Conservative:{equity:30,debt:60,gold:10}};
-function category(name){name=name.toLowerCase();if(name.includes("equity"))return"equity";if(name.includes("debt"))return"debt";return"gold";}
-window.onload=()=>{addRow("HDFC Equity Fund",300000);addRow("ICICI Equity Fund",200000);addRow("SBI Debt Fund",300000);addRow("Axis Gold Fund",200000);}
-function addRow(name="",value=""){const row=table.insertRow();row.innerHTML=`<td><input value="${name}"></td><td>-</td><td><input type="number" value="${value}"></td><td>-</td><td>-</td><td>-</td>`;}
-function rebalance(){
-const rows=table.rows;
-const total=Number(document.getElementById("total").value);
-const risk=document.getElementById("risk").value;
-const lumpsum=Number(document.getElementById("lumpsum").value);
-document.getElementById("aum").innerText="₹"+total.toLocaleString();
-let data=[];
-for(let i=1;i<rows.length;i++){data.push({name:rows[i].cells[0].children[0].value,value:Number(rows[i].cells[2].children[0].value)});}
-const target=RISK_MAP[risk];
-let catTotals={equity:0,debt:0,gold:0};
-data.forEach(f=>{catTotals[category(f.name)]+=f.value;});
-let buy=0,sell=0,remaining=lumpsum;
-for(let i=1;i<rows.length;i++){
-const fund=data[i-1];
-const cat=category(fund.name);
-const targetVal=(target[cat]/100)*total*(fund.value/catTotals[cat]);
-let gap=targetVal-fund.value;
-let action="HOLD",amt=0;
-if(gap>0){let alloc=Math.min(gap,remaining);remaining-=alloc;gap-=alloc;}
-if(gap>100){action="BUY";amt=gap;buy+=amt;}
-else if(gap<-100){action="SELL";amt=Math.abs(gap);sell+=amt;}
-rows[i].cells[1].innerText=cat;
-rows[i].cells[3].innerText="₹"+Math.round(targetVal).toLocaleString();
-rows[i].cells[4].innerHTML=`<span class="${action}">${action}</span>`;
-rows[i].cells[5].innerText="₹"+Math.round(amt).toLocaleString();
-}
-document.getElementById("buy").innerText="₹"+Math.round(buy).toLocaleString();
-document.getElementById("sell").innerText="₹"+Math.round(sell).toLocaleString();
-document.getElementById("lump").innerText="₹"+(lumpsum-remaining).toLocaleString();
-}
-</script>
+// ─── FUND DATABASE ───
+const FUND_DB = [
+  { name:"Parag Parikh Flexi Cap Fund - Direct (G)",        lc:63.04, mc: 2.19, sc: 2.68, ot:32.09 },
+  { name:"HDFC Flexi Cap Fund - Direct (G)",                lc:75.69, mc: 7.48, sc: 7.26, ot: 9.57 },
+  { name:"Kotak Flexi Cap Fund - Direct (G)",               lc:75.44, mc:19.30, sc: 3.49, ot: 1.77 },
+  { name:"Aditya Birla SL Flexi Cap Fund - Direct (G)",     lc:59.52, mc:21.48, sc:16.97, ot: 2.03 },
+  { name:"SBI Flexi Cap Fund - Direct (G)",                 lc:66.40, mc:12.99, sc:12.42, ot: 8.19 },
+  { name:"Kotak Midcap Fund - Direct (G)",                  lc:16.77, mc:69.37, sc:12.90, ot: 0.96 },
+  { name:"Nippon India Growth Mid Cap Fund - Direct (G)",   lc:26.30, mc:60.74, sc:11.62, ot: 1.34 },
+  { name:"Motilal Oswal Midcap Fund-Dir (G)",               lc:22.80, mc:69.95, sc: 0.00, ot: 7.24 },
+  { name:"SBI Focused Fund - Direct (G)",                   lc:52.34, mc:16.94, sc: 6.51, ot:24.21 },
+  { name:"HDFC Focused Fund - Direct (G)",                  lc:71.61, mc: 7.67, sc:10.56, ot:10.16 },
+  { name:"ICICI Pru Focused Equity Fund - Direct (G)",      lc:70.35, mc:27.21, sc: 0.00, ot: 2.45 },
+  { name:"Franklin India Focused Equity Fund - Direct (G)", lc:78.94, mc: 8.62, sc: 9.11, ot: 3.33 },
+  { name:"AXIS Focused Fund - Direct (G)",                  lc:72.20, mc:16.35, sc: 0.00, ot:11.45 },
+];
 
+// ─── RISK PROFILES ───
+const RISK_PROFILES = {
+  conservative:          {lc:50,mc: 5,sc: 0,ot:45},
+  moderate:              {lc:40,mc:15,sc: 5,ot:40},
+  moderately_aggressive: {lc:35,mc:20,sc:15,ot:30},
+  aggressive:            {lc:30,mc:25,sc:20,ot:25},
+  very_aggressive:       {lc:20,mc:30,sc:30,ot:20},
+};
+
+const CAT_COLORS = {lc:'#1565c0', mc:'#2e7d32', sc:'#e65100', ot:'#9e9e9e'};
+const CAT_LABELS = {lc:'Large Cap', mc:'Mid Cap', sc:'Small Cap', ot:'Others'};
+
+// ─── FAMILY DATABASE (dummy data simulating Zoho CRM Contacts by Account) ───
+const FAMILY_DB = [
+  { account: 'Mehta Family', members: [
+    { id:1, name:'Dr. Sagar Mehta', pan:'ABCDE1234F', email:'sagar@example.com', selected:true },
+    { id:2, name:'Priya Mehta',     pan:'FGHIJ5678K', email:'priya@example.com', selected:true },
+    { id:3, name:'Rohan Mehta',     pan:'KLMNO9012P', email:'rohan@example.com', selected:true },
+    { id:4, name:'Anita Mehta',     pan:'QRSTU3456V', email:'anita@example.com', selected:true },
+  ]},
+  { account: 'Sharma Family', members: [
+    { id:5, name:'Amit Sharma',  pan:'VWXYZ7890A', email:'amit@example.com',  selected:true },
+    { id:6, name:'Neha Sharma',  pan:'BCDEF1234G', email:'neha@example.com',  selected:true },
+  ]},
+  { account: 'Kapoor Family', members: [
+    { id:7, name:'Vikram Kapoor',  pan:'GHIJK2345L', email:'vikram@example.com', selected:true },
+    { id:8, name:'Sunita Kapoor',  pan:'MNOPQ6789R', email:'sunita@example.com', selected:true },
+    { id:9, name:'Arjun Kapoor',   pan:'STUVW0123X', email:'arjun@example.com',  selected:true },
+  ]},
+];
+
+let reviewLevel = 'client';    // 'client' | 'family'
+let selectedFamily = null;     // reference to a FAMILY_DB entry
+let reviewTypeVal = 'both';    // 'both' | 'lumpsum' | 'sip'
+
+function setReviewType(type) {
+  reviewTypeVal = type;
+  // step tabs: 3=page-funds, 4=page-results, 5=page-sip, 6=page-sip-results
+  const lumpsumSteps = document.querySelectorAll('.step-tab[data-page="page-funds"], .step-tab[data-page="page-results"]');
+  const sipSteps     = document.querySelectorAll('.step-tab[data-page="page-sip"], .step-tab[data-page="page-sip-results"]');
+  lumpsumSteps.forEach(el => el.style.display = (type === 'sip') ? 'none' : '');
+  sipSteps.forEach(el => el.style.display = (type === 'lumpsum') ? 'none' : '');
+  // hide/show "Continue to SIP" button on lumpsum results page
+  const sipBtn = document.getElementById('continueToSipBtn');
+  if (sipBtn) sipBtn.style.display = (type === 'lumpsum') ? 'none' : '';
+}
+
+// ─── FAMILY FUNCTIONS ───
+function setReviewLevel(level) {
+  reviewLevel = level;
+  document.getElementById('levelBtnClient').classList.toggle('active', level === 'client');
+  document.getElementById('levelBtnFamily').classList.toggle('active', level === 'family');
+  document.getElementById('familyPanel').style.display = level === 'family' ? 'block' : 'none';
+  document.getElementById('clientInfoCard').style.display = level === 'client' ? 'block' : 'none';
+  // toggle investor columns on results pages only (input pages no longer have this column)
+  document.querySelectorAll('#page-results .investor-col, #page-sip-results .investor-col').forEach(el => el.style.display = level === 'family' ? '' : 'none');
+  if (level === 'client') {
+    selectedFamily = null;
+    document.getElementById('familySelect').value = '';
+    document.getElementById('memberListContainer').innerHTML = '';
+  }
+  renderFundsLayout();
+}
+
+function selectFamily(accountName) {
+  selectedFamily = FAMILY_DB.find(f => f.account === accountName) || null;
+  if (selectedFamily) {
+    // reset all members to selected
+    selectedFamily.members.forEach(m => m.selected = true);
+  }
+  renderFamilyMembers();
+  renderFundsLayout();
+}
+
+function toggleMember(memberId) {
+  if (!selectedFamily) return;
+  const m = selectedFamily.members.find(m => m.id === memberId);
+  if (m) m.selected = !m.selected;
+  renderFamilyMembers();
+  renderFundsLayout();
+}
+
+function getSelectedMembers() {
+  if (!selectedFamily) return [];
+  return selectedFamily.members;
+}
+
+function renderFamilyMembers() {
+  const container = document.getElementById('memberListContainer');
+  if (!selectedFamily) { container.innerHTML = ''; return; }
+  const members = selectedFamily.members;
+  container.innerHTML = `
+    <div class="member-list">
+      ${members.map(m => `
+        <div class="member-row">
+          <div class="member-info">
+            <div class="member-name">${m.name}</div>
+            <div class="member-detail">PAN: ${m.pan} &middot; ${m.email}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="member-count">${members.length} members in family</div>
+  `;
+}
+
+// ─── FUNDS LAYOUT (handles client mode vs per-member collapsible folds) ───
+function fundsTableHTML(suffix) {
+  const tbodyId = 'fundsBody' + suffix;
+  return `
+    <div class="fund-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th style="min-width:220px">Fund Name</th>
+            <th style="min-width:100px">Folio</th>
+            <th style="min-width:130px">Current Value (₹)</th>
+            <th style="min-width:100px">SIP (₹/mo)</th>
+            <th style="min-width:80px">LC%</th>
+            <th style="min-width:80px">MC%</th>
+            <th style="min-width:80px">SC%</th>
+            <th style="min-width:80px">Oth%</th>
+            <th class="th-buy" style="min-width:120px">Buy (₹)</th>
+            <th class="th-sell" style="min-width:120px">Sell (₹)</th>
+            <th style="min-width:70px">Net Action</th>
+            <th style="min-width:120px;text-align:center">Action</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="${tbodyId}"></tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderFundsLayout() {
+  const container = document.getElementById('fundsContainer');
+  if (!container) return;
+  // capture existing fund rows so we can re-create them after the rebuild
+  const currentRows = readFunds();
+  const useFamily = (reviewLevel === 'family' && selectedFamily);
+
+  if (!useFamily) {
+    container.innerHTML = fundsTableHTML('') +
+      `<button class="add-row-btn" onclick="addFundRow()">+ Add Fund</button>`;
+  } else {
+    let html = '';
+    selectedFamily.members.forEach(m => {
+      html += `
+        <div class="member-fold" id="memberFold-${m.id}">
+          <button type="button" class="member-fold-header" onclick="toggleMemberFold('${m.id}')">
+            <span class="member-fold-caret">▼</span>
+            <span class="member-fold-name">👤 ${m.name} <span class="member-pan">PAN: ${m.pan}</span></span>
+            <span class="member-fold-meta" id="memberFoldMeta-${m.id}">
+              <span><span class="mfm-label">Holdings</span><span class="mfm-val">₹0</span></span>
+            </span>
+          </button>
+          <div class="member-fold-body">
+            ${fundsTableHTML('-' + m.id)}
+            <button class="add-row-btn" onclick="addFundRow({_memberId:'${m.id}'})">+ Add Fund for ${m.name}</button>
+          </div>
+        </div>`;
+    });
+    // Unassigned section (hidden when empty)
+    html += `
+      <div class="member-fold member-fold-unassigned" id="memberFold-unassigned" style="display:none">
+        <button type="button" class="member-fold-header" onclick="toggleMemberFold('unassigned')">
+          <span class="member-fold-caret">▼</span>
+          <span class="member-fold-name">⚠️ Unassigned <span class="member-pan">funds without a family member</span></span>
+          <span class="member-fold-meta" id="memberFoldMeta-unassigned"></span>
+        </button>
+        <div class="member-fold-body">
+          ${fundsTableHTML('-unassigned')}
+        </div>
+      </div>`;
+    container.innerHTML = html;
+    // tag tbodies with their member name for readFunds()
+    selectedFamily.members.forEach(m => {
+      const tb = document.getElementById('fundsBody-' + m.id);
+      if (tb) tb.dataset.memberName = m.name;
+    });
+    const unTb = document.getElementById('fundsBody-unassigned');
+    if (unTb) unTb.dataset.memberName = '';
+  }
+
+  // re-create rows in their (new) sections
+  currentRows.forEach(r => {
+    let memberId = '';
+    if (useFamily) {
+      const found = selectedFamily.members.find(m => m.name === r.investor);
+      memberId = found ? found.id : 'unassigned';
+    }
+    const cleanName = (r.name === 'Unnamed Fund') ? '' : r.name;
+    const cleanFolio = (r.folio === '—') ? '' : r.folio;
+    addFundRow({
+      ...r,
+      _memberId: memberId,
+      name: cleanName,
+      folio: cleanFolio,
+    });
+  });
+
+  refreshLiveAlloc();
+}
+
+function toggleMemberFold(key) {
+  const fold = document.getElementById('memberFold-' + key);
+  if (!fold) return;
+  fold.classList.toggle('collapsed');
+}
+
+function updateMemberFoldMeta() {
+  if (reviewLevel !== 'family' || !selectedFamily) return;
+  const funds = readFunds();
+  selectedFamily.members.forEach(m => {
+    const meta = document.getElementById('memberFoldMeta-' + m.id);
+    if (!meta) return;
+    const memberFunds = funds.filter(f => f.investor === m.name);
+    const total    = memberFunds.reduce((s,f)=>s+f.value, 0);
+    const buyTotal  = memberFunds.reduce((s,f)=>s+f.buy, 0);
+    const sellTotal = memberFunds.reduce((s,f)=>s+f.sell, 0);
+    meta.innerHTML = `
+      <span><span class="mfm-label">Funds</span><span class="mfm-val">${memberFunds.length}</span></span>
+      <span><span class="mfm-label">Holdings</span><span class="mfm-val">${inr(total)}</span></span>
+      ${buyTotal>0?`<span><span class="mfm-label">Buy</span><span class="mfm-val" style="color:var(--green)">${inr(buyTotal)}</span></span>`:''}
+      ${sellTotal>0?`<span><span class="mfm-label">Sell</span><span class="mfm-val" style="color:var(--red)">${inr(sellTotal)}</span></span>`:''}
+    `;
+  });
+  // Unassigned fold visibility / meta
+  const unFold = document.getElementById('memberFold-unassigned');
+  const unMeta = document.getElementById('memberFoldMeta-unassigned');
+  if (unFold && unMeta) {
+    const memberNames = selectedFamily.members.map(m => m.name);
+    const unfunds = funds.filter(f => !memberNames.includes(f.investor));
+    if (unfunds.length === 0) {
+      unFold.style.display = 'none';
+    } else {
+      unFold.style.display = '';
+      const total = unfunds.reduce((s,f)=>s+f.value, 0);
+      unMeta.innerHTML = `
+        <span><span class="mfm-label">Funds</span><span class="mfm-val">${unfunds.length}</span></span>
+        <span><span class="mfm-label">Holdings</span><span class="mfm-val">${inr(total)}</span></span>
+      `;
+    }
+  }
+}
+
+// ─── RISK PROFILE ───
+function applyRiskProfile() {
+  const p = RISK_PROFILES[document.getElementById('riskProfile').value];
+  if (!p) return;
+  ['lc','mc','sc','ot'].forEach(k => document.getElementById(k+'Range').value = p[k]);
+  updateAlloc();
+  refreshLiveAlloc();
+}
+
+function updateAlloc() {
+  const keys = ['lc','mc','sc','ot'];
+  const vals = keys.map(k => parseInt(document.getElementById(k+'Range').value)||0);
+  const total = vals.reduce((a,b)=>a+b,0);
+  keys.forEach((k,i)=>{
+    document.getElementById(k+'Val').innerHTML = vals[i]+' <span>%</span>';
+    document.getElementById(k+'Pct').textContent = vals[i]+'%';
+  });
+  const fill = document.getElementById('allocTotalFill');
+  const lbl  = document.getElementById('allocTotalPct');
+  fill.style.width = Math.min(total,100)+'%';
+  fill.style.background = total===100?'var(--green)':total>100?'var(--red)':'var(--amber)';
+  lbl.textContent = total+'%';
+  lbl.style.color = total===100?'var(--green)':'var(--red)';
+  document.getElementById('allocNotice').style.display = total!==100?'flex':'none';
+  refreshLiveAlloc();
+}
+
+// ─── NAVIGATION ───
+function continueFromAllocation() {
+  if (reviewTypeVal === 'sip') goToSip();
+  else goTo('page-funds');
+}
+
+function goTo(pageId) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  document.querySelectorAll('.step-tab').forEach(t=>t.classList.toggle('active',t.dataset.page===pageId));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (pageId==='page-funds') refreshLiveAlloc();
+  if (pageId==='page-sip') refreshSipAlloc();
+}
+
+// ─── ROW COUNTER ───
+let rowCounter = 0;
+
+// ─── ADD FUND ROW ───
+function addFundRow(data={}) {
+  rowCounter++;
+  const id = rowCounter;
+
+  // resolve target tbody (supports per-member sections in family mode)
+  const useFamily = (reviewLevel === 'family' && selectedFamily);
+  let tbody = null;
+  if (useFamily) {
+    let memberId = data._memberId;
+    if (!memberId && data.investor) {
+      const m = selectedFamily.members.find(mm => mm.name === data.investor);
+      if (m) memberId = m.id;
+    }
+    if (!memberId) memberId = 'unassigned';
+    tbody = document.getElementById('fundsBody-' + memberId);
+    if (memberId === 'unassigned') {
+      const fold = document.getElementById('memberFold-unassigned');
+      if (fold) fold.style.display = '';
+    }
+  }
+  if (!tbody) tbody = document.getElementById('fundsBody');
+  if (!tbody) return;
+
+  const tr = document.createElement('tr');
+  tr.id = 'row-'+id;
+  // persist investor on the row so the client→family rebuild can route it to the right member
+  if (data.investor) tr.dataset.investor = data.investor;
+  const lc = data.lc!==undefined ? Number(data.lc).toFixed(2) : '0.00';
+  const mc = data.mc!==undefined ? Number(data.mc).toFixed(2) : '0.00';
+  const sc = data.sc!==undefined ? Number(data.sc).toFixed(2) : '0.00';
+  const ot = data.ot!==undefined ? Number(data.ot).toFixed(2) : '0.00';
+  const isExisting = !!(data.name);
+  const buyVal  = (data.buy && data.buy > 0) ? data.buy : '';
+  const sellVal = (data.sell && data.sell > 0) ? data.sell : '';
+  const actionVal = data.action || 'none';
+  tr.innerHTML = `
+    <td class="mono" style="color:var(--ink3);font-size:11px;width:28px">${id}</td>
+    <td>
+      <div class="ac-wrap">
+        <input type="text" id="fname-${id}" placeholder="Search fund…" value="${data.name||''}"
+          autocomplete="off" oninput="onFundInput(${id})" onfocus="onFundInput(${id})" onblur="hideDropdown(${id})"
+          style="min-width:200px" ${isExisting?'readonly':''} />
+        <div class="ac-dropdown" id="acdrop-${id}"></div>
+      </div>
+    </td>
+    <td><input type="text"   id="folio-${id}" placeholder="Folio no." value="${data.folio||''}" style="font-family:'DM Mono',monospace;font-size:11.5px;min-width:90px" ${isExisting?'readonly':''} /></td>
+    <td><input type="number" id="fval-${id}"  placeholder="0" value="${data.value||''}" min="0" oninput="refreshLiveAlloc()" ${isExisting?'readonly':''} /></td>
+    <td><input type="number" id="fsip-${id}"  placeholder="0" value="${data.sip||0}"   min="0" style="min-width:80px" ${isExisting?'readonly':''} /></td>
+    <td><input type="number" id="flc-${id}"   value="${lc}" min="0" max="100" oninput="refreshLiveAlloc()" style="min-width:68px" /></td>
+    <td><input type="number" id="fmc-${id}"   value="${mc}" min="0" max="100" oninput="refreshLiveAlloc()" style="min-width:68px" /></td>
+    <td><input type="number" id="fsc-${id}"   value="${sc}" min="0" max="100" oninput="refreshLiveAlloc()" style="min-width:68px" /></td>
+    <td><input type="number" id="fot-${id}"   value="${ot}" min="0" max="100" oninput="refreshLiveAlloc()" style="min-width:68px" /></td>
+    <td><input type="number" id="fbuy-${id}"  placeholder="0" value="${buyVal}" min="0"
+      class="input-buy" oninput="clearConflict(${id},'buy');refreshLiveAlloc()" style="min-width:100px" /></td>
+    <td><input type="number" id="fsell-${id}" placeholder="0" value="${sellVal}" min="0"
+      class="input-sell" oninput="clearConflict(${id},'sell');refreshLiveAlloc()" style="min-width:100px" /></td>
+    <td id="fnet-${id}"><span class="net-chip HOLD">—</span></td>
+    <td style="text-align:center">
+      <select id="faction-${id}" onchange="onActionChange(${id})" style="font-size:12px;padding:5px 6px;border-radius:6px;min-width:110px">
+        <option value="none" ${actionVal==='none'?'selected':''}>None</option>
+        <option value="exit_all" ${actionVal==='exit_all'?'selected':''}>Exit All Units</option>
+        <option value="exclude" ${actionVal==='exclude'?'selected':''}>Exclude</option>
+      </select>
+    </td>
+    <td><button class="btn btn-danger" onclick="removeFundRow(${id})">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  // lock alloc inputs by default (admin required to edit)
+  if (!adminUnlocked) {
+    ['flc','fmc','fsc','fot'].forEach(pfx => {
+      const el = document.getElementById(pfx+'-'+id);
+      if (el) { el.classList.add('alloc-locked'); el.readOnly = true; }
+    });
+  }
+  // re-apply action styling for non-default actions
+  if (actionVal !== 'none') onActionChange(id);
+}
+
+// clear the other field if user types in one; cap sell at current value
+function clearConflict(id, typed) {
+  const other = typed==='buy' ? 'fsell-'+id : 'fbuy-'+id;
+  const otherEl = document.getElementById(other);
+  if (otherEl && parseFloat(otherEl.value)>0) otherEl.value='';
+  // cap sell at current fund value
+  if (typed==='sell') {
+    const sellEl = document.getElementById('fsell-'+id);
+    const valEl  = document.getElementById('fval-'+id);
+    const maxVal = parseFloat(valEl?.value)||0;
+    const sellAmt = parseFloat(sellEl?.value)||0;
+    if (sellAmt > maxVal && maxVal > 0) {
+      sellEl.value = maxVal;
+      sellEl.style.borderColor = 'var(--amber)';
+      sellEl.title = 'Capped at current fund value';
+      setTimeout(()=>{ sellEl.style.borderColor=''; sellEl.title=''; }, 2000);
+    }
+  }
+}
+
+function onActionChange(id) {
+  const action = document.getElementById('faction-'+id)?.value || 'none';
+  const row = document.getElementById('row-'+id);
+  if (!row) return;
+
+  const buyEl  = document.getElementById('fbuy-'+id);
+  const sellEl = document.getElementById('fsell-'+id);
+  const valEl  = document.getElementById('fval-'+id);
+  const nameInput = document.getElementById('fname-'+id);
+  const currentVal = parseFloat(valEl?.value) || 0;
+
+  if (action === 'exit_all') {
+    // Set sell = full current value, clear buy, disable both
+    if (sellEl) { sellEl.value = currentVal; sellEl.readOnly = true; }
+    if (buyEl)  { buyEl.value = ''; buyEl.readOnly = true; }
+    row.style.opacity = '';
+    row.style.background = '#fdf3f3';
+    if (nameInput) nameInput.style.textDecoration = '';
+  } else if (action === 'exclude') {
+    // Exclude from allocation, clear buy/sell, disable both
+    if (sellEl) { sellEl.value = ''; sellEl.readOnly = true; }
+    if (buyEl)  { buyEl.value = ''; buyEl.readOnly = true; }
+    row.style.opacity = '0.45';
+    row.style.background = '#fafafa';
+    if (nameInput) nameInput.style.textDecoration = 'line-through';
+  } else {
+    // None — normal mode, enable buy/sell
+    if (sellEl) sellEl.readOnly = false;
+    if (buyEl)  buyEl.readOnly = false;
+    row.style.opacity = '';
+    row.style.background = '';
+    if (nameInput) nameInput.style.textDecoration = '';
+  }
+  refreshLiveAlloc();
+}
+
+function removeFundRow(id) {
+  document.getElementById('row-'+id)?.remove();
+  refreshLiveAlloc();
+}
+
+// ─── AUTOCOMPLETE ───
+function onFundInput(id) {
+  const q=(document.getElementById('fname-'+id)?.value||'').toLowerCase().trim();
+  const drop=document.getElementById('acdrop-'+id);
+  const matches=FUND_DB.filter(f=>!q||f.name.toLowerCase().includes(q));
+  if(!matches.length){drop.classList.remove('open');return}
+  drop.innerHTML=matches.map(f=>`
+    <div class="ac-item" onmousedown="selectFund(${id},${FUND_DB.indexOf(f)})">
+      ${f.name}
+      <small>LC ${f.lc}% · MC ${f.mc}% · SC ${f.sc}% · Oth ${f.ot}%</small>
+    </div>`).join('');
+  drop.classList.add('open');
+}
+function selectFund(rowId, idx) {
+  const f=FUND_DB[idx];
+  document.getElementById('fname-'+rowId).value=f.name;
+  document.getElementById('flc-'+rowId).value=f.lc.toFixed(2);
+  document.getElementById('fmc-'+rowId).value=f.mc.toFixed(2);
+  document.getElementById('fsc-'+rowId).value=f.sc.toFixed(2);
+  document.getElementById('fot-'+rowId).value=f.ot.toFixed(2);
+  document.getElementById('acdrop-'+rowId).classList.remove('open');
+  refreshLiveAlloc();
+  setTimeout(()=>document.getElementById('folio-'+rowId)?.focus(),50);
+}
+function hideDropdown(id){setTimeout(()=>document.getElementById('acdrop-'+id)?.classList.remove('open'),200)}
+
+// ─── READ FUNDS ───
+function readFunds() {
+  // collect rows from the (possibly nested) per-member tbodies inside #fundsContainer
+  const container = document.getElementById('fundsContainer');
+  const rows = container ? container.querySelectorAll('tr[id^="row-"]') : document.querySelectorAll('#fundsBody tr[id^="row-"]');
+  return Array.from(rows).map(tr=>{
+    const id=tr.id.replace('row-','');
+    const value    = parseFloat(document.getElementById('fval-'+id)?.value)||0;
+    const action   = document.getElementById('faction-'+id)?.value || 'none';
+    const excluded = action === 'exclude';
+    const buy      = action === 'exit_all' ? 0 : (parseFloat(document.getElementById('fbuy-'+id)?.value)||0);
+    const sell     = action === 'exit_all' ? value : (parseFloat(document.getElementById('fsell-'+id)?.value)||0);
+    // investor is derived from the parent tbody's data attribute (set in renderFundsLayout);
+    // fall back to the row's own data-investor (preserves assignment across layout rebuilds and in client mode)
+    const tb = tr.closest('tbody');
+    const tbName = tb?.dataset.memberName;
+    const investor = (tbName !== undefined && tbName !== '') ? tbName : (tr.dataset.investor || '');
+    return {
+      id,
+      name:     document.getElementById('fname-'+id)?.value?.trim()||'Unnamed Fund',
+      folio:    document.getElementById('folio-'+id)?.value?.trim()||'—',
+      value, sip: parseFloat(document.getElementById('fsip-'+id)?.value)||0,
+      lc:       parseFloat(document.getElementById('flc-'+id)?.value)||0,
+      mc:       parseFloat(document.getElementById('fmc-'+id)?.value)||0,
+      sc:       parseFloat(document.getElementById('fsc-'+id)?.value)||0,
+      ot:       parseFloat(document.getElementById('fot-'+id)?.value)||0,
+      buy, sell, excluded, action,
+      investor,
+      netTrade:   buy - sell,
+      afterValue: value + buy - sell,
+    };
+  });
+}
+
+// ─── HELPERS ───
+const inr = n => '₹'+Math.abs(Math.round(n)).toLocaleString('en-IN');
+const pct = (n,d=1) => (n*100).toFixed(d)+'%';
+
+// ─── LIVE ALLOCATION DASHBOARD ───
+function refreshLiveAlloc() {
+  const funds = readFunds();
+  const activeFunds   = funds.filter(f => !f.excluded);  // used in allocation maths
+  const excludedFunds = funds.filter(f => f.excluded);
+
+  // get target
+  const target = {
+    lc:(parseInt(document.getElementById('lcRange').value)||0)/100,
+    mc:(parseInt(document.getElementById('mcRange').value)||0)/100,
+    sc:(parseInt(document.getElementById('scRange').value)||0)/100,
+    ot:(parseInt(document.getElementById('otRange').value)||0)/100,
+  };
+
+  const portVal  = parseFloat(document.getElementById('totalPortfolio')?.value)||0;
+  const lumpsum  = parseFloat(document.getElementById('additionalLumpsum')?.value)||0;
+  const actualTotal = activeFunds.reduce((s,f)=>s+f.value, 0);
+  const base = actualTotal||portVal;
+  const grand = base+lumpsum;
+
+  // current weighted allocation — active funds only
+  const cur={lc:0,mc:0,sc:0,ot:0};
+  activeFunds.forEach(f=>{
+    cur.lc+=f.value*f.lc/100;
+    cur.mc+=f.value*f.mc/100;
+    cur.sc+=f.value*f.sc/100;
+    cur.ot+=f.value*f.ot/100;
+  });
+
+  // after-trade allocation — active funds only
+  const aft={lc:0,mc:0,sc:0,ot:0};
+  const totalBuyIn   = activeFunds.reduce((s,f)=>s+f.buy,0);
+  const totalSellOut = funds.reduce((s,f)=>s+f.sell,0);   // sell proceeds from ALL funds (incl excluded)
+  const afterTotal   = base + lumpsum + totalBuyIn - activeFunds.reduce((s,f)=>s+f.sell,0);
+
+  activeFunds.forEach(f=>{
+    aft.lc+=f.afterValue*f.lc/100;
+    aft.mc+=f.afterValue*f.mc/100;
+    aft.sc+=f.afterValue*f.sc/100;
+    aft.ot+=f.afterValue*f.ot/100;
+  });
+
+  // update net action chips per row (all funds)
+  funds.forEach(f=>{
+    const el=document.getElementById('fnet-'+f.id);
+    if(!el) return;
+    if(f.action==='exit_all') el.innerHTML=`<span class="net-chip SELL">EXIT ALL ${inr(f.value)}</span>`;
+    else if(f.excluded)       el.innerHTML=`<span class="net-chip" style="background:var(--surface2);color:var(--ink3);font-style:italic">Excluded</span>`;
+    else if(f.buy>0)          el.innerHTML=`<span class="net-chip BUY">BUY ${inr(f.buy)}</span>`;
+    else if(f.sell>0)         el.innerHTML=`<span class="net-chip SELL">SELL ${inr(f.sell)}</span>`;
+    else                      el.innerHTML=`<span class="net-chip HOLD">HOLD</span>`;
+  });
+
+  // available for allocation = sell proceeds (all funds) + lumpsum − active buys committed
+  const totalBuyCommitted = activeFunds.reduce((s,f)=>s+f.buy,0);
+  const available = totalSellOut + lumpsum - totalBuyCommitted;
+
+  // update totals
+  document.getElementById('liveTotal').textContent          = inr(base);
+  document.getElementById('liveTotalAfter').textContent      = inr(afterTotal);
+  document.getElementById('liveSellProceeds').textContent    = inr(totalSellOut);
+  document.getElementById('liveAvailable').textContent       = inr(Math.max(available, 0));
+  document.getElementById('liveAvailable').style.color       = available < 0 ? 'var(--red)' : 'var(--green)';
+
+  // build rows
+  const keys=['lc','mc','sc','ot'];
+  const tbody=document.getElementById('liveAllocBody');
+  tbody.innerHTML = keys.map(k=>{
+    const curVal  = cur[k];
+    const curPctV = base>0 ? curVal/base : 0;
+    const tgtPctV = target[k];
+    const tgtVal  = grand * tgtPctV;
+    const dev     = curPctV - tgtPctV;             // in decimal
+    const devPct  = (dev*100).toFixed(1);
+    const devSign = dev>0 ? '+' : '';
+    const devClass= Math.abs(dev*100)<1 ? 'dev-ok' : dev>0 ? 'dev-over' : 'dev-under';
+
+    const aftVal  = aft[k];
+    const aftPctV = afterTotal>0 ? aftVal/afterTotal : 0;
+    const aftPctD = (aftPctV*100).toFixed(1);
+
+    return `<tr>
+      <td style="font-weight:600;white-space:nowrap">
+        <span class="cat-color-dot" style="background:${CAT_COLORS[k]}"></span>${CAT_LABELS[k]}
+      </td>
+      <td class="mono-val">${inr(curVal)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="alloc-bar-wrap" style="width:180px">
+            <div class="alloc-bar-fill" style="width:${Math.min(curPctV*100,100).toFixed(1)}%;background:${CAT_COLORS[k]}"></div>
+          </div>
+          <span class="mono-val" style="font-size:11.5px;color:var(--ink2);min-width:36px">${(curPctV*100).toFixed(1)}%</span>
+        </div>
+      </td>
+      <td class="mono-val" style="color:var(--ink2)">${(tgtPctV*100).toFixed(1)}%</td>
+      <td class="mono-val" style="color:var(--ink2)">${inr(tgtVal)}</td>
+      <td><span class="dev-pill ${devClass}">${devSign}${devPct}%</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="alloc-bar-wrap" style="width:180px">
+            <div class="alloc-bar-fill" style="width:${Math.min(aftPctV*100,100).toFixed(1)}%;background:${CAT_COLORS[k]};opacity:0.82"></div>
+          </div>
+          <span class="mono-val" style="font-size:11.5px;color:${Math.abs(aftPctV-tgtPctV)*100<3?'var(--green)':'var(--ink2)'};min-width:36px">${aftPctD}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // refresh per-member fold meta totals
+  updateMemberFoldMeta();
+}
+
+// ─── TAX CALCULATIONS ───
+const TAX_RATES = {
+  debtSlab: 0.30,          // Debt LTCG & STCG: taxed at slab rate (30% default)
+  equityLTCG: 0.125,       // Equity LTCG: 12.5% on gains above ₹1.25 lakh
+  equityLTCGExemption: 125000, // ₹1.25 lakh exemption
+  equitySTCG: 0.20,        // Equity STCG: 20%
+};
+
+function recalcTax() {
+  const debtLTCG   = parseFloat(document.getElementById('taxDebtLTCG')?.value) || 0;
+  const debtSTCG   = parseFloat(document.getElementById('taxDebtSTCG')?.value) || 0;
+  const eqLTCG     = parseFloat(document.getElementById('taxEquityLTCG')?.value) || 0;
+  const eqSTCG     = parseFloat(document.getElementById('taxEquitySTCG')?.value) || 0;
+
+  // Debt: both LT and ST taxed at slab rate
+  const taxDebtLT = Math.max(debtLTCG, 0) * TAX_RATES.debtSlab;
+  const taxDebtST = Math.max(debtSTCG, 0) * TAX_RATES.debtSlab;
+
+  // Equity LTCG: 12.5% on gains exceeding ₹1.25 lakh exemption
+  const eqLTCGTaxable = Math.max(eqLTCG - TAX_RATES.equityLTCGExemption, 0);
+  const taxEqLT = eqLTCGTaxable * TAX_RATES.equityLTCG;
+
+  // Equity STCG: 20%
+  const taxEqST = Math.max(eqSTCG, 0) * TAX_RATES.equitySTCG;
+
+  const debtTotal   = taxDebtLT + taxDebtST;
+  const equityTotal = taxEqLT + taxEqST;
+  const grandTotal  = debtTotal + equityTotal;
+
+  // Total sell proceeds from fund table
+  const funds = readFunds();
+  const totalSellOut = funds.reduce((s, f) => s + f.sell, 0);
+  const netProceeds  = totalSellOut - grandTotal;
+
+  // Update UI
+  document.getElementById('taxDebtLTCGResult').textContent   = inr(taxDebtLT);
+  document.getElementById('taxDebtSTCGResult').textContent   = inr(taxDebtST);
+  document.getElementById('taxEquityLTCGResult').textContent = inr(taxEqLT);
+  document.getElementById('taxEquitySTCGResult').textContent = inr(taxEqST);
+  document.getElementById('taxDebtTotal').textContent        = inr(debtTotal);
+  document.getElementById('taxEquityTotal').textContent      = inr(equityTotal);
+  document.getElementById('taxGrandTotal').textContent       = inr(grandTotal);
+  document.getElementById('taxNetProceeds').textContent      = inr(Math.max(netProceeds, 0));
+  document.getElementById('taxNetProceeds').style.color      = netProceeds < 0 ? 'var(--red)' : 'var(--green)';
+}
+
+// ─── CALCULATE (results page) ───
+function calculate() {
+  goTo('page-results');
+  document.getElementById('reportDate').textContent =
+    'Generated on '+new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  const clientName  = document.getElementById('clientName').value||'Client';
+  const clientPAN   = document.getElementById('clientPAN').value||'—';
+  const clientEmail = document.getElementById('clientEmail').value||'—';
+  const riskEl      = document.getElementById('riskProfile');
+  const risk        = riskEl.options[riskEl.selectedIndex]?.text||'—';
+  const portVal     = parseFloat(document.getElementById('totalPortfolio').value)||0;
+  const lumpsum     = parseFloat(document.getElementById('additionalLumpsum').value)||0;
+
+  const target={
+    lc:(parseInt(document.getElementById('lcRange').value)||0)/100,
+    mc:(parseInt(document.getElementById('mcRange').value)||0)/100,
+    sc:(parseInt(document.getElementById('scRange').value)||0)/100,
+    ot:(parseInt(document.getElementById('otRange').value)||0)/100,
+  };
+
+  const funds=readFunds().filter(f=>f.value>0||f.name!=='Unnamed Fund');
+  const activeFunds = funds.filter(f=>!f.excluded);
+  const actualTotal=activeFunds.reduce((s,f)=>s+f.value,0);
+  const base=actualTotal||portVal;
+  const grand=base+lumpsum;
+
+  const cur={lc:0,mc:0,sc:0,ot:0};
+  activeFunds.forEach(f=>{cur.lc+=f.value*f.lc/100;cur.mc+=f.value*f.mc/100;cur.sc+=f.value*f.sc/100;cur.ot+=f.value*f.ot/100;});
+  const curPct={};
+  Object.keys(cur).forEach(k=>curPct[k]=base>0?cur[k]/base:0);
+
+  // Orders come strictly from the Buy/Sell columns on the holdings page (active funds only)
+  const sellOrders=[],buyOrders=[];
+  let totalSell=0, totalBuy=0;
+
+  const results=activeFunds.map(f=>{
+    let action='HOLD', trade=0;
+    if(f.buy>0)       { action='BUY';  trade=f.buy;  totalBuy +=trade; buyOrders.push({name:f.name,folio:f.folio,amt:trade,investor:f.investor}); }
+    else if(f.sell>0) { action='SELL'; trade=f.sell; totalSell+=trade; sellOrders.push({name:f.name,folio:f.folio,amt:trade,investor:f.investor}); }
+    const afterValue = f.value + (action==='BUY' ? trade : action==='SELL' ? -trade : 0);
+    return {...f, action, trade, afterValue};
+  });
+
+  // Include lumpsum as a standalone buy if no fund buy entered
+  if(lumpsum>0 && buyOrders.length===0){
+    buyOrders.push({name:'Additional Lumpsum — deploy per model',folio:'—',amt:lumpsum});
+    totalBuy+=lumpsum;
+  }
+
+  // hero
+  const serviceModelEl = document.getElementById('serviceModel');
+  const serviceModel   = serviceModelEl.options[serviceModelEl.selectedIndex]?.text || '—';
+  if (reviewLevel === 'family' && selectedFamily) {
+    const selMembers = getSelectedMembers();
+    document.getElementById('heroName').textContent = selectedFamily.account;
+    document.getElementById('heroMeta').innerHTML = `<span>👨‍👩‍👧‍👦 Family Review</span><span>👥 ${selMembers.length} members: ${selMembers.map(m=>m.name).join(', ')}</span><span>⚡ ${risk}</span><span>📂 ${serviceModel}</span>`;
+  } else {
+    document.getElementById('heroName').textContent=clientName;
+    document.getElementById('heroMeta').innerHTML=`<span>📋 PAN: ${clientPAN}</span><span>📧 ${clientEmail}</span><span>⚡ ${risk}</span><span>📂 ${serviceModel}</span>`;
+  }
+  document.getElementById('heroStats').innerHTML=`
+    <div class="hero-stat"><div class="hero-stat-label">Portfolio Value</div><div class="hero-stat-val">${inr(base)}</div></div>
+    <div class="hero-stat"><div class="hero-stat-label">Additional Lumpsum</div><div class="hero-stat-val">${inr(lumpsum)}</div></div>
+    <div class="hero-stat"><div class="hero-stat-label">Grand Total</div><div class="hero-stat-val">${inr(grand)}</div></div>
+    <div class="hero-stat"><div class="hero-stat-label">Total to Sell</div><div class="hero-stat-val sell">${inr(totalSell)}</div></div>
+    <div class="hero-stat"><div class="hero-stat-label">Total to Buy</div><div class="hero-stat-val buy">${inr(totalBuy)}</div></div>
+    <div class="hero-stat"><div class="hero-stat-label">No. of Funds</div><div class="hero-stat-val">${activeFunds.length} <span style="font-size:13px;opacity:.6">${funds.length-activeFunds.length>0?'(+'+( funds.length-activeFunds.length)+' excl.)':''}</span></div></div>
+  `;
+
+  const COLORS={lc:'#1565c0',mc:'#2e7d32',sc:'#e65100',ot:'#607d8b'};
+  const LABELS={lc:'Large Cap',mc:'Mid Cap',sc:'Small Cap',ot:'Others'};
+  function allocViz(pcts,ref){
+    return Object.keys(LABELS).map(k=>{
+      const v=Math.round((pcts[k]||0)*100);
+      const r=Math.round((ref[k]||0)*100);
+      const d=v-r;
+      const badge=Math.abs(d)>=2?`<span class="drift-badge ${d>0?'drift-over':'drift-under'}">${d>0?'+':''}${d}%</span>`:'';
+      return `<div class="alloc-row">
+        <div class="alloc-row-label">${LABELS[k]}</div>
+        <div class="alloc-row-bar-wrap"><div class="alloc-row-bar" style="width:${Math.min(v,100)}%;background:${COLORS[k]}"></div></div>
+        <div class="alloc-row-pct">${v}%${badge}</div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('currentAllocViz').innerHTML=allocViz(curPct,target);
+  document.getElementById('targetAllocViz').innerHTML=allocViz(target,target);
+
+  document.getElementById('totalSellAmt').textContent=inr(totalSell);
+  document.getElementById('totalBuyAmt').textContent=inr(totalBuy);
+
+  function groupByInvestor(orders) {
+    const groups = {};
+    orders.forEach(o => {
+      const key = o.investor || 'Unassigned';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(o);
+    });
+    return groups;
+  }
+
+  function renderOrders(orders,type,cid){
+    const el=document.getElementById(cid);
+    if(!orders.length){el.innerHTML=`<div class="no-orders">No ${type} orders.<br><small>All funds are balanced.</small></div>`;return;}
+
+    const renderItem = o => `
+      <div class="order-item">
+        <div class="order-item-info">
+          <div class="order-item-name">${o.name}</div>
+          <div class="order-item-folio">Folio: ${o.folio}</div>
+        </div>
+        <div class="order-item-amt ${type}">${type==='sell'?'− ':'+ '}${inr(o.amt)}</div>
+      </div>`;
+
+    if (reviewLevel === 'family') {
+      const groups = groupByInvestor(orders);
+      el.innerHTML = Object.keys(groups).map(investor => {
+        const items = groups[investor];
+        const subtotal = items.reduce((s,o)=>s+o.amt,0);
+        return `<div class="investor-group-header">👤 ${investor} <span class="ig-count">(${items.length} order${items.length>1?'s':''} — ${inr(subtotal)})</span></div>` +
+          items.map(renderItem).join('');
+      }).join('');
+    } else {
+      el.innerHTML = orders.map(renderItem).join('');
+    }
+  }
+  renderOrders(sellOrders,'sell','sellOrders');
+  renderOrders(buyOrders,'buy','buyOrders');
+
+  const finalTotal=results.reduce((s,f)=>s+f.afterValue,0);
+  const tbody=document.getElementById('finalPortfolioBody');
+  // exclude funds that are fully sold (afterValue <= 0)
+  const remaining = results.filter(f => f.afterValue > 0);
+  const colSpan = reviewLevel === 'family' ? 7 : 6;
+  if(!remaining.length){tbody.innerHTML=`<tr><td colspan="${colSpan}" style="text-align:center;padding:28px;color:var(--ink3)">No funds remaining after rebalancing.</td></tr>`;}
+  else {
+    let idx=0;
+    const isFamily = reviewLevel === 'family';
+    tbody.innerHTML=remaining.map(f=>{
+      idx++;
+      const share=finalTotal>0?(f.afterValue/finalTotal*100).toFixed(1):'0.0';
+      return `<tr>
+        <td class="mono" style="color:var(--ink3);font-size:11px">${idx}</td>
+        ${isFamily ? `<td class="investor-col" style="font-size:12px;color:var(--ink2)">${f.investor||'—'}</td>` : ''}
+        <td style="font-weight:500;font-size:13px;max-width:220px;line-height:1.4">${f.name}</td>
+        <td class="mono" style="font-size:11px;color:var(--ink3)">${f.folio}</td>
+        <td class="mono" style="color:var(--ink3)">${inr(f.value)}</td>
+        <td class="mono" style="font-weight:600">${inr(f.afterValue)}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:7px">
+            <div style="flex:1;height:5px;background:var(--surface2);border-radius:3px;max-width:80px;overflow:hidden">
+              <div style="height:100%;border-radius:3px;background:var(--green);width:${Math.min(parseFloat(share),100)}%"></div>
+            </div>
+            <span class="mono" style="font-size:11.5px;color:var(--ink2)">${share}%</span>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── LUMPSUM STRATEGY ──
+  // store buy orders for the strategy section
+  window._lastBuyOrders = buyOrders;
+  updateLumpsumStrategy();
+
+}
+
+// ─── LIQUID FUND MAP ───
+// Maps AMC keywords to their liquid fund names
+const LIQUID_FUND_MAP = [
+  { match: /parag parikh/i,    liquid: 'Parag Parikh Liquid Fund - Direct (G)'    },
+  { match: /hdfc/i,            liquid: 'HDFC Liquid Fund - Direct (G)'             },
+  { match: /kotak/i,           liquid: 'Kotak Liquid Fund - Direct (G)'            },
+  { match: /aditya birla|absl/i, liquid: 'Aditya Birla SL Liquid Fund - Direct (G)' },
+  { match: /sbi/i,             liquid: 'SBI Liquid Fund - Direct (G)'              },
+  { match: /nippon/i,          liquid: 'Nippon India Liquid Fund - Direct (G)'     },
+  { match: /motilal/i,         liquid: 'Motilal Oswal Liquid Fund - Direct (G)'    },
+  { match: /icici/i,           liquid: 'ICICI Pru Liquid Fund - Direct (G)'        },
+  { match: /franklin/i,        liquid: 'Franklin India Liquid Fund - Direct (G)'   },
+  { match: /axis/i,            liquid: 'Axis Liquid Fund - Direct (G)'             },
+];
+
+function getLiquidFund(fundName) {
+  for (const entry of LIQUID_FUND_MAP) {
+    if (entry.match.test(fundName)) return entry.liquid;
+  }
+  return fundName.split(' ')[0] + ' Liquid Fund - Direct (G)';
+}
+
+// ─── LUMPSUM STRATEGY ───
+function updateLumpsumStrategy() {
+  const lpPct  = parseInt(document.getElementById('lumpsumPct')?.value) || 40;
+  const stpPct = 100 - lpPct;
+  const weeks  = parseInt(document.getElementById('stpWeeks')?.value) || 24;
+  const orders = window._lastBuyOrders || [];
+
+  document.getElementById('lumpsumPctVal').textContent = lpPct + '%';
+  document.getElementById('stpPctVal').textContent     = stpPct + '%';
+  document.getElementById('lumpsumBar').style.width    = lpPct + '%';
+  document.getElementById('stpBar').style.width        = stpPct + '%';
+
+  const totalBuy = orders.reduce((s,o)=>s+o.amt, 0);
+  document.getElementById('stratTotalBuy').textContent = inr(totalBuy);
+
+  const tbody = document.getElementById('lumpsumStrategyBody');
+  if (!orders.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--ink3)">No buy orders to strategise. Enter buy amounts on the Holdings page.</td></tr>`;
+    return;
+  }
+
+  const renderStratRow = (o, idx) => {
+    const lpAmt    = Math.round(o.amt * lpPct / 100);
+    const stpTotal = o.amt - lpAmt;
+    const weekly   = weeks > 0 ? Math.round(stpTotal / weeks) : stpTotal;
+    const liquid   = getLiquidFund(o.name);
+    return `<tr>
+      <td class="mono" style="color:var(--ink3);font-size:11px">${idx}</td>
+      <td style="font-weight:500;font-size:13px;line-height:1.4;max-width:200px">${o.name}<br><span class="mono" style="font-size:10.5px;color:var(--ink3)">Folio: ${o.folio}</span></td>
+      <td class="mono" style="font-weight:600">${inr(o.amt)}</td>
+      <td style="background:#f1faf2">
+        <span class="mono" style="font-weight:700;color:var(--green);font-size:14px">${inr(lpAmt)}</span>
+        <div style="font-size:10.5px;color:var(--green);margin-top:2px">${lpPct}% direct buy</div>
+      </td>
+      <td style="background:#e8f4fd;font-size:12px;max-width:180px;line-height:1.4;color:var(--blue)">${liquid}</td>
+      <td style="background:#e8f4fd">
+        <span class="mono" style="font-weight:700;color:var(--blue);font-size:14px">${inr(stpTotal)}</span>
+        <div style="font-size:10.5px;color:var(--blue);margin-top:2px">${stpPct}% via STP</div>
+      </td>
+      <td style="background:#e8f4fd">
+        <span class="mono" style="font-weight:600;font-size:13px">${inr(weekly)}</span>
+        <div style="font-size:10.5px;color:var(--ink3);margin-top:2px">/ week × ${weeks} weeks</div>
+      </td>
+    </tr>`;
+  };
+
+  if (reviewLevel === 'family') {
+    const groups = {};
+    orders.forEach(o => {
+      const key = o.investor || 'Unassigned';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(o);
+    });
+    let idx = 0;
+    tbody.innerHTML = Object.keys(groups).map(investor => {
+      const items = groups[investor];
+      const memberTotal = items.reduce((s,o)=>s+o.amt, 0);
+      return `<tr><td colspan="7" style="background:var(--surface2);font-weight:700;padding:10px 14px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3)">👤 ${investor} — Total: ${inr(memberTotal)}</td></tr>` +
+        items.map(o => { idx++; return renderStratRow(o, idx); }).join('');
+    }).join('');
+  } else {
+    tbody.innerHTML = orders.map((o, i) => renderStratRow(o, i+1)).join('');
+  }
+}
+
+// ─── SIP REBALANCING ───
+function goToSip() {
+  populateSipTable();
+  goTo('page-sip');
+  refreshSipAlloc();
+}
+
+function sipTableHTML(suffix) {
+  const tbodyId = 'sipFundsBody' + suffix;
+  return `
+    <div class="fund-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th style="min-width:220px">Fund Name</th>
+            <th style="min-width:100px">Folio</th>
+            <th style="min-width:130px">Current SIP (₹/mo)</th>
+            <th style="min-width:80px">LC%</th>
+            <th style="min-width:80px">MC%</th>
+            <th style="min-width:80px">SC%</th>
+            <th style="min-width:80px">Oth%</th>
+            <th class="th-buy" style="min-width:130px">Start SIP (₹/mo)</th>
+            <th class="th-sell" style="min-width:130px">Stop SIP (₹/mo)</th>
+            <th style="min-width:80px">Net Action</th>
+          </tr>
+        </thead>
+        <tbody id="${tbodyId}"></tbody>
+      </table>
+    </div>
+  `;
+}
+
+function sipRowHTML(f, idx) {
+  const existingStart = document.getElementById('sip-start-'+f.id)?.value || '';
+  const existingStop  = document.getElementById('sip-stop-'+f.id)?.value || '';
+  return `<tr data-fund-id="${f.id}">
+    <td class="mono" style="color:var(--ink3);font-size:11px">${idx}</td>
+    <td style="font-weight:500;font-size:13px;max-width:220px;line-height:1.4">${f.name}</td>
+    <td class="mono" style="font-size:11px;color:var(--ink3)">${f.folio}</td>
+    <td><span class="mono" style="font-weight:600">${inr(f.sip)}</span></td>
+    <td class="mono" style="font-size:11.5px">${f.lc.toFixed(2)}%</td>
+    <td class="mono" style="font-size:11.5px">${f.mc.toFixed(2)}%</td>
+    <td class="mono" style="font-size:11.5px">${f.sc.toFixed(2)}%</td>
+    <td class="mono" style="font-size:11.5px">${f.ot.toFixed(2)}%</td>
+    <td><input type="number" id="sip-start-${f.id}" placeholder="0" value="${existingStart}" min="0"
+      class="input-buy" oninput="clearSipConflict('${f.id}','start');refreshSipAlloc()" style="min-width:110px" /></td>
+    <td><input type="number" id="sip-stop-${f.id}" placeholder="0" value="${existingStop}" min="0"
+      class="input-sell" oninput="clearSipConflict('${f.id}','stop');refreshSipAlloc()" style="min-width:110px" /></td>
+    <td id="sip-net-${f.id}"><span class="net-chip HOLD">—</span></td>
+  </tr>`;
+}
+
+function toggleSipMemberFold(key) {
+  const fold = document.getElementById('sipMemberFold-' + key);
+  if (!fold) return;
+  fold.classList.toggle('collapsed');
+}
+
+function populateSipTable() {
+  const container = document.getElementById('sipFundsContainer');
+  if (!container) return;
+  const funds = readFunds();
+  const eligible = funds.filter(f => f.name !== 'Unnamed Fund' || f.sip > 0);
+  const useFamily = (reviewLevel === 'family' && selectedFamily);
+  // toggle investor columns on results page only
+  document.querySelectorAll('#page-sip-results .investor-col').forEach(el => el.style.display = useFamily ? '' : 'none');
+
+  if (!useFamily) {
+    container.innerHTML = sipTableHTML('');
+    const tbody = document.getElementById('sipFundsBody');
+    if (tbody) tbody.innerHTML = eligible.map((f, i) => sipRowHTML(f, i+1)).join('');
+    return;
+  }
+
+  // Family mode: per-member collapsible folds
+  let html = '';
+  selectedFamily.members.forEach(m => {
+    html += `
+      <div class="member-fold" id="sipMemberFold-${m.id}">
+        <button type="button" class="member-fold-header" onclick="toggleSipMemberFold('${m.id}')">
+          <span class="member-fold-caret">▼</span>
+          <span class="member-fold-name">👤 ${m.name} <span class="member-pan">PAN: ${m.pan}</span></span>
+          <span class="member-fold-meta" id="sipMemberFoldMeta-${m.id}"></span>
+        </button>
+        <div class="member-fold-body">
+          ${sipTableHTML('-' + m.id)}
+        </div>
+      </div>`;
+  });
+  html += `
+    <div class="member-fold member-fold-unassigned" id="sipMemberFold-unassigned" style="display:none">
+      <button type="button" class="member-fold-header" onclick="toggleSipMemberFold('unassigned')">
+        <span class="member-fold-caret">▼</span>
+        <span class="member-fold-name">⚠️ Unassigned <span class="member-pan">SIPs without a family member</span></span>
+        <span class="member-fold-meta" id="sipMemberFoldMeta-unassigned"></span>
+      </button>
+      <div class="member-fold-body">
+        ${sipTableHTML('-unassigned')}
+      </div>
+    </div>`;
+  container.innerHTML = html;
+
+  // populate each member's tbody, then unassigned
+  const memberNames = selectedFamily.members.map(m => m.name);
+  selectedFamily.members.forEach(m => {
+    const tb = document.getElementById('sipFundsBody-' + m.id);
+    if (!tb) return;
+    const memberFunds = eligible.filter(f => f.investor === m.name);
+    if (memberFunds.length === 0) {
+      tb.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:18px;color:var(--ink3);font-style:italic">No SIPs for ${m.name}.</td></tr>`;
+    } else {
+      tb.innerHTML = memberFunds.map((f, i) => sipRowHTML(f, i+1)).join('');
+    }
+  });
+  const unfunds = eligible.filter(f => !memberNames.includes(f.investor));
+  const unTb = document.getElementById('sipFundsBody-unassigned');
+  const unFold = document.getElementById('sipMemberFold-unassigned');
+  if (unfunds.length > 0) {
+    if (unFold) unFold.style.display = '';
+    if (unTb) unTb.innerHTML = unfunds.map((f, i) => sipRowHTML(f, i+1)).join('');
+  } else {
+    if (unFold) unFold.style.display = 'none';
+  }
+}
+
+function updateSipMemberFoldMeta() {
+  if (reviewLevel !== 'family' || !selectedFamily) return;
+  const funds = readSipFunds();
+  selectedFamily.members.forEach(m => {
+    const meta = document.getElementById('sipMemberFoldMeta-' + m.id);
+    if (!meta) return;
+    const memberFunds = funds.filter(f => f.investor === m.name);
+    const totalSip = memberFunds.reduce((s,f)=>s+f.sip, 0);
+    const startSip = memberFunds.reduce((s,f)=>s+f.startSip, 0);
+    const stopSip  = memberFunds.reduce((s,f)=>s+f.stopSip, 0);
+    meta.innerHTML = `
+      <span><span class="mfm-label">SIPs</span><span class="mfm-val">${memberFunds.filter(f=>f.sip>0).length}</span></span>
+      <span><span class="mfm-label">Monthly</span><span class="mfm-val">${inr(totalSip)}/mo</span></span>
+      ${startSip>0?`<span><span class="mfm-label">Start</span><span class="mfm-val" style="color:var(--green)">${inr(startSip)}/mo</span></span>`:''}
+      ${stopSip>0?`<span><span class="mfm-label">Stop</span><span class="mfm-val" style="color:var(--red)">${inr(stopSip)}/mo</span></span>`:''}
+    `;
+  });
+  const memberNames = selectedFamily.members.map(m => m.name);
+  const unFold = document.getElementById('sipMemberFold-unassigned');
+  const unMeta = document.getElementById('sipMemberFoldMeta-unassigned');
+  if (unFold && unMeta) {
+    const unfunds = funds.filter(f => !memberNames.includes(f.investor));
+    if (unfunds.length === 0) {
+      unFold.style.display = 'none';
+    } else {
+      unFold.style.display = '';
+      const totalSip = unfunds.reduce((s,f)=>s+f.sip, 0);
+      unMeta.innerHTML = `
+        <span><span class="mfm-label">SIPs</span><span class="mfm-val">${unfunds.filter(f=>f.sip>0).length}</span></span>
+        <span><span class="mfm-label">Monthly</span><span class="mfm-val">${inr(totalSip)}/mo</span></span>
+      `;
+    }
+  }
+}
+
+function clearSipConflict(id, typed) {
+  const other = typed === 'start' ? 'sip-stop-'+id : 'sip-start-'+id;
+  const otherEl = document.getElementById(other);
+  if (otherEl && parseFloat(otherEl.value) > 0) otherEl.value = '';
+  // cap stop at current SIP
+  if (typed === 'stop') {
+    const stopEl = document.getElementById('sip-stop-'+id);
+    const funds = readFunds();
+    const fund = funds.find(f => f.id === id);
+    const maxSip = fund ? fund.sip : 0;
+    const stopAmt = parseFloat(stopEl?.value) || 0;
+    if (stopAmt > maxSip && maxSip > 0) {
+      stopEl.value = maxSip;
+      stopEl.style.borderColor = 'var(--amber)';
+      stopEl.title = 'Capped at current SIP amount';
+      setTimeout(() => { stopEl.style.borderColor = ''; stopEl.title = ''; }, 2000);
+    }
+  }
+}
+
+function readSipFunds() {
+  const funds = readFunds();
+  return funds.filter(f => f.name !== 'Unnamed Fund' || f.sip > 0).map(f => {
+    const startSip = parseFloat(document.getElementById('sip-start-'+f.id)?.value) || 0;
+    const stopSip  = parseFloat(document.getElementById('sip-stop-'+f.id)?.value) || 0;
+    return {
+      ...f,
+      startSip,
+      stopSip,
+      afterSip: f.sip + startSip - stopSip,
+    };
+  });
+}
+
+function refreshSipAlloc() {
+  const funds = readSipFunds();
+  const target = {
+    lc:(parseInt(document.getElementById('lcRange').value)||0)/100,
+    mc:(parseInt(document.getElementById('mcRange').value)||0)/100,
+    sc:(parseInt(document.getElementById('scRange').value)||0)/100,
+    ot:(parseInt(document.getElementById('otRange').value)||0)/100,
+  };
+
+  const totalSip = funds.reduce((s,f) => s + f.sip, 0);
+  const totalStartSip = funds.reduce((s,f) => s + f.startSip, 0);
+  const totalStopSip  = funds.reduce((s,f) => s + f.stopSip, 0);
+  const totalAfterSip = funds.reduce((s,f) => s + f.afterSip, 0);
+
+  // current SIP allocation
+  const cur = {lc:0, mc:0, sc:0, ot:0};
+  funds.forEach(f => {
+    cur.lc += f.sip * f.lc / 100;
+    cur.mc += f.sip * f.mc / 100;
+    cur.sc += f.sip * f.sc / 100;
+    cur.ot += f.sip * f.ot / 100;
+  });
+
+  // after-trade SIP allocation
+  const aft = {lc:0, mc:0, sc:0, ot:0};
+  funds.forEach(f => {
+    aft.lc += f.afterSip * f.lc / 100;
+    aft.mc += f.afterSip * f.mc / 100;
+    aft.sc += f.afterSip * f.sc / 100;
+    aft.ot += f.afterSip * f.ot / 100;
+  });
+
+  // update net action chips
+  funds.forEach(f => {
+    const el = document.getElementById('sip-net-'+f.id);
+    if (!el) return;
+    if (f.startSip > 0)  el.innerHTML = `<span class="net-chip BUY">START SIP ${inr(f.startSip)}</span>`;
+    else if (f.stopSip > 0) el.innerHTML = `<span class="net-chip SELL">STOP SIP ${inr(f.stopSip)}</span>`;
+    else el.innerHTML = `<span class="net-chip HOLD">HOLD</span>`;
+  });
+
+  // update totals
+  document.getElementById('sipLiveTotal').textContent       = inr(totalSip);
+  document.getElementById('sipLiveTotalAfter').textContent   = inr(totalAfterSip);
+  document.getElementById('sipLiveStopTotal').textContent    = inr(totalStopSip);
+  document.getElementById('sipLiveStartTotal').textContent   = inr(totalStartSip);
+
+  // build rows
+  const keys = ['lc','mc','sc','ot'];
+  const tbody = document.getElementById('sipLiveAllocBody');
+  tbody.innerHTML = keys.map(k => {
+    const curVal  = cur[k];
+    const curPctV = totalSip > 0 ? curVal / totalSip : 0;
+    const tgtPctV = target[k];
+    const tgtVal  = totalSip * tgtPctV;
+    const dev     = curPctV - tgtPctV;
+    const devPct  = (dev*100).toFixed(1);
+    const devSign = dev > 0 ? '+' : '';
+    const devClass = Math.abs(dev*100) < 1 ? 'dev-ok' : dev > 0 ? 'dev-over' : 'dev-under';
+
+    const aftVal  = aft[k];
+    const aftPctV = totalAfterSip > 0 ? aftVal / totalAfterSip : 0;
+    const aftPctD = (aftPctV*100).toFixed(1);
+
+    return `<tr>
+      <td style="font-weight:600;white-space:nowrap">
+        <span class="cat-color-dot" style="background:${CAT_COLORS[k]}"></span>${CAT_LABELS[k]}
+      </td>
+      <td class="mono-val">${inr(curVal)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="alloc-bar-wrap" style="width:180px">
+            <div class="alloc-bar-fill" style="width:${Math.min(curPctV*100,100).toFixed(1)}%;background:${CAT_COLORS[k]}"></div>
+          </div>
+          <span class="mono-val" style="font-size:11.5px;color:var(--ink2);min-width:36px">${(curPctV*100).toFixed(1)}%</span>
+        </div>
+      </td>
+      <td class="mono-val" style="color:var(--ink2)">${(tgtPctV*100).toFixed(1)}%</td>
+      <td class="mono-val" style="color:var(--ink2)">${inr(tgtVal)}</td>
+      <td><span class="dev-pill ${devClass}">${devSign}${devPct}%</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="alloc-bar-wrap" style="width:180px">
+            <div class="alloc-bar-fill" style="width:${Math.min(aftPctV*100,100).toFixed(1)}%;background:${CAT_COLORS[k]};opacity:0.82"></div>
+          </div>
+          <span class="mono-val" style="font-size:11.5px;color:${Math.abs(aftPctV-tgtPctV)*100<3?'var(--green)':'var(--ink2)'};min-width:36px">${aftPctD}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // refresh per-member fold meta totals
+  updateSipMemberFoldMeta();
+}
+
+// ─── CALCULATE SIP (results page 6) ───
+function calculateSip() {
+  // Ensure SIP table is populated (the container is empty until populateSipTable runs)
+  const sipContainer = document.getElementById('sipFundsContainer');
+  if (sipContainer && !sipContainer.children.length) populateSipTable();
+
+  goTo('page-sip-results');
+  document.getElementById('sipReportDate').textContent =
+    'Generated on ' + new Date().toLocaleDateString('en-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+  const clientName  = document.getElementById('clientName').value || 'Client';
+  const clientPAN   = document.getElementById('clientPAN').value || '—';
+  const clientEmail = document.getElementById('clientEmail').value || '—';
+  const riskEl      = document.getElementById('riskProfile');
+  const risk        = riskEl.options[riskEl.selectedIndex]?.text || '—';
+  const serviceModelEl = document.getElementById('serviceModel');
+  const serviceModel   = serviceModelEl.options[serviceModelEl.selectedIndex]?.text || '—';
+
+  const target = {
+    lc:(parseInt(document.getElementById('lcRange').value)||0)/100,
+    mc:(parseInt(document.getElementById('mcRange').value)||0)/100,
+    sc:(parseInt(document.getElementById('scRange').value)||0)/100,
+    ot:(parseInt(document.getElementById('otRange').value)||0)/100,
+  };
+
+  const funds = readSipFunds().filter(f => f.sip > 0 || f.startSip > 0 || f.name !== 'Unnamed Fund');
+  const totalSip = funds.reduce((s,f) => s + f.sip, 0);
+
+  const cur = {lc:0, mc:0, sc:0, ot:0};
+  funds.forEach(f => { cur.lc+=f.sip*f.lc/100; cur.mc+=f.sip*f.mc/100; cur.sc+=f.sip*f.sc/100; cur.ot+=f.sip*f.ot/100; });
+  const curPct = {};
+  Object.keys(cur).forEach(k => curPct[k] = totalSip > 0 ? cur[k] / totalSip : 0);
+
+  // SIP orders from Start/Stop columns
+  const stopOrders = [], startOrders = [];
+  let totalStop = 0, totalStart = 0;
+
+  const results = funds.map(f => {
+    let action = 'HOLD';
+    if (f.startSip > 0) { action = 'START SIP'; totalStart += f.startSip; startOrders.push({name:f.name, folio:f.folio, amt:f.startSip, investor:f.investor}); }
+    else if (f.stopSip > 0) { action = 'STOP SIP'; totalStop += f.stopSip; stopOrders.push({name:f.name, folio:f.folio, amt:f.stopSip, investor:f.investor}); }
+    return {...f, action};
+  });
+
+  // Hero
+  if (reviewLevel === 'family' && selectedFamily) {
+    const selMembers = getSelectedMembers();
+    document.getElementById('sipHeroName').textContent = selectedFamily.account;
+    document.getElementById('sipHeroMeta').innerHTML = `<span>👨‍👩‍👧‍👦 Family Review</span><span>👥 ${selMembers.length} members: ${selMembers.map(m=>m.name).join(', ')}</span><span>⚡ ${risk}</span><span>📂 ${serviceModel}</span>`;
+  } else {
+    document.getElementById('sipHeroName').textContent = clientName;
+    document.getElementById('sipHeroMeta').innerHTML = `<span>📋 PAN: ${clientPAN}</span><span>📧 ${clientEmail}</span><span>⚡ ${risk}</span><span>📂 ${serviceModel}</span>`;
+  }
+
+  const totalAfterSip = funds.reduce((s,f) => s + f.afterSip, 0);
+  document.getElementById('sipHeroStats').innerHTML = `
+    <div class="hero-stat"><div class="hero-stat-label">Total Monthly SIP</div><div class="hero-stat-val">${inr(totalSip)}</div></div>
+    <div class="hero-stat"><div class="hero-stat-label">After Rebalancing SIP</div><div class="hero-stat-val">${inr(totalAfterSip)}</div></div>
+    <div class="hero-stat"><div class="hero-stat-label">Total to Stop</div><div class="hero-stat-val sell">${inr(totalStop)}</div></div>
+    <div class="hero-stat"><div class="hero-stat-label">Total to Start</div><div class="hero-stat-val buy">${inr(totalStart)}</div></div>
+    <div class="hero-stat"><div class="hero-stat-label">No. of Funds</div><div class="hero-stat-val">${funds.filter(f=>f.sip>0||f.startSip>0).length}</div></div>
+  `;
+
+  // Allocation visualization
+  const COLORS = {lc:'#1565c0', mc:'#2e7d32', sc:'#e65100', ot:'#607d8b'};
+  const LABELS = {lc:'Large Cap', mc:'Mid Cap', sc:'Small Cap', ot:'Others'};
+  function allocViz(pcts, ref) {
+    return Object.keys(LABELS).map(k => {
+      const v = Math.round((pcts[k]||0)*100);
+      const r = Math.round((ref[k]||0)*100);
+      const d = v - r;
+      const badge = Math.abs(d) >= 2 ? `<span class="drift-badge ${d>0?'drift-over':'drift-under'}">${d>0?'+':''}${d}%</span>` : '';
+      return `<div class="alloc-row">
+        <div class="alloc-row-label">${LABELS[k]}</div>
+        <div class="alloc-row-bar-wrap"><div class="alloc-row-bar" style="width:${Math.min(v,100)}%;background:${COLORS[k]}"></div></div>
+        <div class="alloc-row-pct">${v}%${badge}</div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('sipCurrentAllocViz').innerHTML = allocViz(curPct, target);
+  document.getElementById('sipTargetAllocViz').innerHTML  = allocViz(target, target);
+
+  // Orders
+  document.getElementById('sipTotalStopAmt').textContent  = inr(totalStop);
+  document.getElementById('sipTotalStartAmt').textContent = inr(totalStart);
+
+  function groupByInvestor(orders) {
+    const groups = {};
+    orders.forEach(o => { const key = o.investor || 'Unassigned'; if (!groups[key]) groups[key] = []; groups[key].push(o); });
+    return groups;
+  }
+
+  function renderSipOrders(orders, type, cid) {
+    const el = document.getElementById(cid);
+    const label = type === 'sell' ? 'stop SIP' : 'start SIP';
+    if (!orders.length) { el.innerHTML = `<div class="no-orders">No ${label} orders.</div>`; return; }
+
+    const renderItem = o => `
+      <div class="order-item">
+        <div class="order-item-info">
+          <div class="order-item-name">${o.name}</div>
+          <div class="order-item-folio">Folio: ${o.folio}</div>
+        </div>
+        <div class="order-item-amt ${type}">${type==='sell'?'− ':'+ '}${inr(o.amt)}/mo</div>
+      </div>`;
+
+    if (reviewLevel === 'family') {
+      const groups = groupByInvestor(orders);
+      el.innerHTML = Object.keys(groups).map(investor => {
+        const items = groups[investor];
+        const subtotal = items.reduce((s,o) => s + o.amt, 0);
+        return `<div class="investor-group-header">👤 ${investor} <span class="ig-count">(${items.length} order${items.length>1?'s':''} — ${inr(subtotal)}/mo)</span></div>` +
+          items.map(renderItem).join('');
+      }).join('');
+    } else {
+      el.innerHTML = orders.map(renderItem).join('');
+    }
+  }
+  renderSipOrders(stopOrders, 'sell', 'sipStopOrders');
+  renderSipOrders(startOrders, 'buy', 'sipStartOrders');
+
+  // Final SIP portfolio table
+  const remaining = results.filter(f => f.afterSip > 0);
+  const finalTotalSip = remaining.reduce((s,f) => s + f.afterSip, 0);
+  const tbody = document.getElementById('sipFinalPortfolioBody');
+  const isFamily = reviewLevel === 'family';
+  const colSpan = isFamily ? 7 : 6;
+
+  if (!remaining.length) {
+    tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center;padding:28px;color:var(--ink3)">No SIPs remaining after rebalancing.</td></tr>`;
+  } else {
+    let idx = 0;
+    tbody.innerHTML = remaining.map(f => {
+      idx++;
+      const share = finalTotalSip > 0 ? (f.afterSip / finalTotalSip * 100).toFixed(1) : '0.0';
+      return `<tr>
+        <td class="mono" style="color:var(--ink3);font-size:11px">${idx}</td>
+        ${isFamily ? `<td class="investor-col" style="font-size:12px;color:var(--ink2)">${f.investor||'—'}</td>` : ''}
+        <td style="font-weight:500;font-size:13px;max-width:220px;line-height:1.4">${f.name}</td>
+        <td class="mono" style="font-size:11px;color:var(--ink3)">${f.folio}</td>
+        <td class="mono" style="color:var(--ink3)">${inr(f.sip)}/mo</td>
+        <td class="mono" style="font-weight:600">${inr(f.afterSip)}/mo</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:7px">
+            <div style="flex:1;height:5px;background:var(--surface2);border-radius:3px;max-width:80px;overflow:hidden">
+              <div style="height:100%;border-radius:3px;background:var(--green);width:${Math.min(parseFloat(share),100)}%"></div>
+            </div>
+            <span class="mono" style="font-size:11.5px;color:var(--ink2)">${share}%</span>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+// ─── ADMIN AUTH ───
+const ADMIN_PASSWORD = 'finnovate@admin';   // change as needed
+let adminUnlocked = false;
+
+function openAdminModal() {
+  if (adminUnlocked) { adminLogout(); return; }
+  document.getElementById('adminModal').classList.add('open');
+  document.getElementById('adminPwInput').value = '';
+  document.getElementById('adminLoginError').textContent = '';
+  setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
+}
+function closeAdminModal() {
+  document.getElementById('adminModal').classList.remove('open');
+}
+function submitAdminLogin() {
+  const pw = document.getElementById('adminPwInput').value;
+  if (pw === ADMIN_PASSWORD) {
+    adminUnlocked = true;
+    closeAdminModal();
+    applyAdminState();
+  } else {
+    document.getElementById('adminLoginError').textContent = 'Incorrect password. Try again.';
+    document.getElementById('adminPwInput').select();
+  }
+}
+function adminLogout() {
+  adminUnlocked = false;
+  applyAdminState();
+}
+function applyAdminState() {
+  const badge = document.getElementById('adminBadge');
+  const note  = document.getElementById('stratAdminNote');
+  if (adminUnlocked) {
+    badge.className = 'admin-badge unlocked';
+    badge.textContent = '🔓 Admin (click to lock)';
+    if (note) note.style.display = 'none';
+    // unlock strategy controls
+    document.getElementById('lumpsumPct').disabled = false;
+    document.getElementById('stpWeeks').disabled   = false;
+    // unlock all alloc inputs
+    document.querySelectorAll('input.alloc-locked').forEach(el => {
+      el.classList.remove('alloc-locked');
+      el.readOnly = false;
+    });
+  } else {
+    badge.className = 'admin-badge locked';
+    badge.textContent = '🔒 Admin';
+    if (note) { note.style.display = 'flex'; }
+    // lock strategy controls
+    document.getElementById('lumpsumPct').disabled = true;
+    document.getElementById('stpWeeks').disabled   = true;
+    // re-lock all alloc inputs that have values (rows live in #fundsContainer's tbodies)
+    document.querySelectorAll('#fundsContainer tr[id^="row-"]').forEach(tr => {
+      const id = tr.id.replace('row-','');
+      ['flc','fmc','fsc','fot'].forEach(pfx => {
+        const el = document.getElementById(pfx+'-'+id);
+        if (el) { el.classList.add('alloc-locked'); el.readOnly = true; }
+      });
+    });
+  }
+}
+
+// ─── INIT ───
+document.addEventListener('DOMContentLoaded',()=>{
+  updateAlloc();
+
+  // Populate family dropdown from FAMILY_DB
+  const familySelect = document.getElementById('familySelect');
+  FAMILY_DB.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.account;
+    opt.textContent = f.account + ' (' + f.members.length + ' members)';
+    familySelect.appendChild(opt);
+  });
+
+  // build the funds layout (creates #fundsBody for client mode)
+  renderFundsLayout();
+
+  const testFunds=[
+    // Dr. Sagar Mehta — flexi-heavy, mixed mid-cap
+    {...FUND_DB[0],  folio:'12345601', value:800000, sip:15000, investor:'Dr. Sagar Mehta'},
+    {...FUND_DB[5],  folio:'12345602', value:500000, sip:10000, investor:'Dr. Sagar Mehta'},
+    {...FUND_DB[2],  folio:'12345606', value:300000, sip: 5000, investor:'Dr. Sagar Mehta'},
+    {...FUND_DB[10], folio:'12345607', value:250000, sip: 7000, investor:'Dr. Sagar Mehta'},
+    // Priya Mehta — mid-cap tilt with flexi/focused balance
+    {...FUND_DB[6],  folio:'12345603', value:400000, sip: 8000, investor:'Priya Mehta'},
+    {...FUND_DB[1],  folio:'12345608', value:350000, sip: 7000, investor:'Priya Mehta'},
+    {...FUND_DB[9],  folio:'12345609', value:200000, sip: 4000, investor:'Priya Mehta'},
+    // Rohan Mehta — focused + mid-cap growth bias
+    {...FUND_DB[8],  folio:'12345604', value:600000, sip:10000, investor:'Rohan Mehta'},
+    {...FUND_DB[3],  folio:'12345610', value:250000, sip: 6000, investor:'Rohan Mehta'},
+    {...FUND_DB[7],  folio:'12345611', value:300000, sip: 8000, investor:'Rohan Mehta'},
+    // Anita Mehta — conservative focused/flexi mix
+    {...FUND_DB[11], folio:'12345605', value:300000, sip: 5000, investor:'Anita Mehta'},
+    {...FUND_DB[4],  folio:'12345612', value:400000, sip: 6000, investor:'Anita Mehta'},
+    {...FUND_DB[12], folio:'12345613', value:200000, sip: 4000, investor:'Anita Mehta'},
+  ];
+  testFunds.forEach(addFundRow);
+  document.getElementById('clientName').value    ='Dr. Sagar Mehta';
+  document.getElementById('clientPAN').value     ='ABCDE1234F';
+  document.getElementById('clientEmail').value   ='sagar.mehta@example.com';
+  document.getElementById('totalPortfolio').value=4850000;
+  document.getElementById('riskProfile').value   ='aggressive';
+  document.getElementById('serviceModel').value  ='Executionary';
+  applyRiskProfile();
+
+  // Default to Family Level with Mehta Family selected so the seeded
+  // multi-member holdings appear grouped under each member on both
+  // Lumpsum and SIP rebalancing pages.
+  setReviewLevel('family');
+  document.getElementById('familySelect').value = 'Mehta Family';
+  selectFamily('Mehta Family');
+
+  refreshLiveAlloc();
+  setReviewType(document.getElementById('reviewType').value);
+});
+</script>
 </body>
 </html>
